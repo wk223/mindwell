@@ -66,10 +66,3 @@ class EmotionalSupportAgent(BaseAgent):
         async for token in self.llm.chat_stream(messages):
             full_response += token
             yield token
-
-        return AgentMessage(
-            agent_id=self.agent_id,
-            agent_type="emotional_support",
-            content=full_response,
-            metadata={"prompt_version": "v1"},
-        )
