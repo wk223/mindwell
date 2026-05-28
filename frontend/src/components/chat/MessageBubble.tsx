@@ -9,6 +9,17 @@ interface MessageBubbleProps {
 export default function MessageBubble({ message }: MessageBubbleProps) {
   const isUser = message.role === "user";
 
+  const renderAgentLabel = () => {
+    // Normalize: backend sends snake_case agent_id, frontend type uses camelCase agentId
+    const agent = (message as any).agent_id || message.agentId;
+    if (!agent || isUser) return null;
+    return (
+      <span className="block mt-1.5 text-[11px] text-slate-600">
+        {agent === "crisis" ? "安全助手" : "MindWell AI"}
+      </span>
+    );
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12, scale: 0.97 }}
@@ -42,11 +53,7 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
         }}
       >
         <p className="whitespace-pre-wrap break-words">{message.content}</p>
-        {message.agentId && (
-          <span className="block mt-1.5 text-[11px] text-slate-600">
-            {message.agentId === "crisis" ? "安全助手" : "MindWell AI"}
-          </span>
-        )}
+        {renderAgentLabel()}
       </div>
     </motion.div>
   );

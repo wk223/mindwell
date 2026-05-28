@@ -5,6 +5,7 @@ export interface SendMessageCallbacks {
   onToken: (token: string) => void;
   onDone: (data: { message: string; conversation_id: string; safety_flags: unknown[] }) => void;
   onSafety: (event: { flags: unknown[]; crisis_response?: string }) => void;
+  onOverride: (message: string) => void;
   onError: (error: Error) => void;
 }
 
@@ -31,6 +32,9 @@ export function sendMessageStream(
   })
     .then(async (res) => {
       if (!res.ok) {
+        if (res.status === 401) {
+          window.dispatchEvent(new CustomEvent("mindwell:auth-expired"));
+        }
         const body = await res.json().catch(() => ({ detail: res.statusText }));
         callbacks.onError(new Error(body.detail || res.statusText));
         return;
@@ -69,6 +73,9 @@ export function sendMessageStream(
                 break;
               case "done":
                 callbacks.onDone(event);
+                break;
+              case "override":
+                callbacks.onOverride(event.message || "");
                 break;
               case "error":
                 callbacks.onError(new Error(event.detail));

@@ -6,8 +6,8 @@ const tabs = [
   { to: "/home", label: "首页", icon: HomeTabIcon },
   { to: "/chat", label: "倾诉", icon: ChatTabIcon },
   { to: "/mood", label: "心情", icon: MoodTabIcon },
+  { to: "/assessment", label: "测评", icon: AssessmentTabIcon },
   { to: "/night", label: "小智", icon: NightTabIcon },
-  { to: "/echo", label: "ECHO", icon: EchoTabIcon },
 ];
 
 export default function MobileShell({ children }: { children: React.ReactNode }) {

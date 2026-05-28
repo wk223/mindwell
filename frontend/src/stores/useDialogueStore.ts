@@ -123,6 +123,10 @@ export const useDialogueStore = create<DialogueState>((set, get) => ({
           set({ safetyFlags: event.flags as SafetyFlag[] });
         }
       },
+      onOverride: (safeMessage) => {
+        // Replace streaming content with safe override message
+        set({ streamingContent: safeMessage });
+      },
       onError: (err) => {
         set({
           isStreaming: false,

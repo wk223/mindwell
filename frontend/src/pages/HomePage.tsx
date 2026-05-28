@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
 const easeOut = [0.25, 0.1, 0.25, 1] as const;
@@ -28,6 +29,7 @@ const fadeUp = {
 
 export default function HomePage() {
   const [showAbout, setShowAbout] = useState(false);
+  const navigate = useNavigate();
   return (
     <div className="max-w-5xl mx-auto px-8 py-10 pb-20">
       {/* ── Hero Emotion Card ── */}
@@ -97,7 +99,10 @@ export default function HomePage() {
               transition={{ duration: 0.5, delay: 0.7, ease: easeOut }}
               className="mt-8"
             >
-              <button className="btn-glow text-base px-10 py-3.5">
+              <button
+                onClick={() => navigate("/chat")}
+                className="btn-glow text-base px-10 py-3.5"
+              >
                 开始倾诉
               </button>
             </motion.div>
