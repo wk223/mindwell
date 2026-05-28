@@ -17,7 +17,8 @@ RUN pip install --no-cache-dir \
     pydantic \
     pydantic-settings \
     "python-jose[cryptography]" \
-    "passlib[bcrypt]" \
+    "passlib[bcrypt]==1.7.4" \
+    "bcrypt==4.0.1" \
     redis \
     httpx \
     jinja2 \
