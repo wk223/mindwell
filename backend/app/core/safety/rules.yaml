@@ -10,7 +10,7 @@ rules:
       - "(我要|准备|打算|计划).{0,4}(自杀|去死|结束生命|离开这个世界)"
       - "(马上|现在|今天就|今晚就).{0,4}(自杀|结束|了断)"
       - "(不想活|活不下去|活够了|生无可恋)"
-      - "suicide\s*(plan|method|attempt|today|now)"
+      - 'suicide\s*(plan|method|attempt|today|now)'
       - "(遗书|遗嘱).{0,4}(写好了|准备好了)"
       - "(告别|永别).{0,2}(这个世界|所有人|大家)"
     severity: critical
