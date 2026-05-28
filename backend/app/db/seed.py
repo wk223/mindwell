@@ -3,12 +3,12 @@ import asyncio
 import hashlib
 import os
 
-import bcrypt
 from sqlalchemy import select
 
 from app.db.session import async_session_factory
 from app.models import assessment, community, conversation, mood, user  # noqa: F401
 from app.models.user import User
+from app.services.auth_service import pwd_context  # use the same CryptContext as auth
 
 
 async def seed_root_user():
@@ -29,7 +29,7 @@ async def seed_root_user():
         user = User(
             nickname=nickname,
             email_hash=email_hash,
-            password_hash=bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode(),
+            password_hash=pwd_context.hash(password),
             avatar_seed=nickname,
         )
         db.add(user)

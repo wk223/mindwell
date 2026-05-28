@@ -1,9 +1,9 @@
-from datetime import datetime, timezone
 from uuid import UUID
 
 from sqlalchemy import select, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.base import utcnow
 from app.models.community import Post, Comment
 
 
@@ -57,25 +57,28 @@ class CommunityService:
         total_result = await self.db.execute(count_stmt)
         total = total_result.scalar() or 0
 
-        # Posts with comment count
+        # Posts with comment count — single JOIN query instead of N+1
+        comment_count_subq = (
+            select(Comment.post_id, func.count(Comment.id).label("cnt"))
+            .where(Comment.moderation_status == "approved")
+            .group_by(Comment.post_id)
+            .subquery()
+        )
         stmt = (
-            select(Post)
+            select(Post, func.coalesce(comment_count_subq.c.cnt, 0).label("comment_count"))
+            .outerjoin(comment_count_subq, Post.id == comment_count_subq.c.post_id)
             .where(Post.moderation_status == moderation_status)
             .order_by(Post.created_at.desc())
             .offset(offset)
             .limit(limit)
         )
         result = await self.db.execute(stmt)
-        posts = result.scalars().all()
+        rows = result.all()
 
-        # Get comment counts
         post_list = []
-        for p in posts:
-            count_stmt = select(func.count(Comment.id)).where(Comment.post_id == p.id)
-            count_result = await self.db.execute(count_stmt)
-            comment_count = count_result.scalar() or 0
+        for p, cc in rows:
             d = self._post_to_dict(p)
-            d["comment_count"] = comment_count
+            d["comment_count"] = int(cc)
             post_list.append(d)
 
         return {
@@ -144,7 +147,7 @@ class CommunityService:
         result = await self.db.execute(stmt)
         post = result.scalars().first()
         if post:
-            post.updated_at = datetime.utcnow()
+            post.updated_at = utcnow()
 
         await self.db.commit()
         await self.db.refresh(comment)
