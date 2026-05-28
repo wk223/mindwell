@@ -11,7 +11,7 @@ interface Particle {
   maxLife: number;
 }
 
-export default function Particles({ active }: { active: boolean }) {
+export default function Particles() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const animRef = useRef<number>(0);
@@ -30,7 +30,7 @@ export default function Particles({ active }: { active: boolean }) {
     window.addEventListener("resize", resize);
 
     const spawn = () => {
-      if (particlesRef.current.length > (active ? 80 : 40)) return;
+      if (particlesRef.current.length > 80) return;
       particlesRef.current.push({
         x: Math.random() * canvas.width,
         y: canvas.height + 10,
@@ -46,10 +46,8 @@ export default function Particles({ active }: { active: boolean }) {
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Spawn particles
-      if (Math.random() < (active ? 0.15 : 0.05)) spawn();
+      if (Math.random() < 0.15) spawn();
 
-      // Update and draw
       particlesRef.current = particlesRef.current.filter((p) => {
         p.life++;
         p.x += p.speedX;
@@ -76,7 +74,7 @@ export default function Particles({ active }: { active: boolean }) {
       cancelAnimationFrame(animRef.current);
       window.removeEventListener("resize", resize);
     };
-  }, [active]);
+  }, []);
 
   return (
     <canvas
