@@ -32,7 +32,7 @@ class Message(Base):
     content: Mapped[str] = mapped_column(Text, nullable=False)
     agent_id: Mapped[str] = mapped_column(String(50), nullable=True)
     safety_flags: Mapped[dict] = mapped_column(JSONB, default=list)
-    extra_meta: Mapped[dict] = mapped_column("metadata", JSONB, default=dict)
+    extra_meta: Mapped[dict] = mapped_column("meta_info", JSONB, default=dict)
     created_at: Mapped[datetime] = mapped_column(default=utcnow)
 
     conversation = relationship("Conversation", back_populates="messages")

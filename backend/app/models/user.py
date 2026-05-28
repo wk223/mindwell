@@ -2,11 +2,6 @@ from sqlalchemy import String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base, new_uuid, utcnow
 
-# Ensure forward-referenced models are registered
-import app.models.mood as _mood  # noqa: F401
-import app.models.assessment as _assessment  # noqa: F401
-import app.models.conversation as _conversation  # noqa: F401
-
 import uuid
 from datetime import datetime
 
