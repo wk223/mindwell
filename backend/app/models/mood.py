@@ -1,6 +1,6 @@
 import uuid
 from datetime import date, datetime
-from sqlalchemy import String, Integer, Text, Date, ForeignKey, ARRAY
+from sqlalchemy import String, Integer, Text, Date, ForeignKey, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base, new_uuid, utcnow
 
@@ -13,7 +13,7 @@ class MoodEntry(Base):
     mood_score: Mapped[int] = mapped_column(Integer, nullable=False)
     mood_label: Mapped[str] = mapped_column(String(30), nullable=True)
     journal_text: Mapped[str] = mapped_column(Text, nullable=True)
-    tags: Mapped[list] = mapped_column(ARRAY(String(50)), default=list)
+    tags: Mapped[list] = mapped_column(JSON, default=list)
     recorded_at: Mapped[date] = mapped_column(Date, default=date.today)
     created_at: Mapped[datetime] = mapped_column(default=utcnow)
 
