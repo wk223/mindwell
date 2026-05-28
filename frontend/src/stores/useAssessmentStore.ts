@@ -73,7 +73,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => ({
 
     const answers: Answer[] = currentScale.questions.map((q) => ({
       question_id: q.id,
-      value: currentAnswers[q.id] ?? 0,
+      value: currentAnswers[q.id]!,  // validated client-side: all questions must be answered
     }));
 
     set({ isSubmitting: true, error: null });

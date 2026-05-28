@@ -6,8 +6,7 @@ from pydantic import BaseModel, Field
 
 from app.dependencies import get_current_user
 from app.models.user import User
-from app.core.llm.client import LLMClient
-from app.config import get_settings
+from app.core.llm.client import get_llm_client
 
 router = APIRouter(prefix="/night", tags=["night"])
 
@@ -37,8 +36,7 @@ async def echo(
     user: User = Depends(get_current_user),
 ):
     """Generate a poetic book-of-answers style response."""
-    settings = get_settings()
-    llm = LLMClient(settings)
+    llm = get_llm_client()
 
     style_instruction = STYLE_PROMPTS.get(body.style, STYLE_PROMPTS["late_night"])
 

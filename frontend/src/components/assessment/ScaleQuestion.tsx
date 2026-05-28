@@ -26,7 +26,8 @@ export default function ScaleQuestion() {
   const isFirst = currentIndex === 0;
   const currentQ = questions[currentIndex];
   const answeredCount = Object.keys(currentAnswers).length;
-  const allAnswered = questions.every((q) => currentAnswers[q.id] !== undefined);
+  const allQuestions = questions.length;
+  const allAnswered = answeredCount === allQuestions;
   const isPersonality = currentScale.id === "PERSONALITY_16";
   const progress = Math.round((answeredCount / total) * 100);
 
@@ -124,11 +125,14 @@ export default function ScaleQuestion() {
           <button
             onClick={() => submit(currentScale.id, selectedType ?? undefined)}
             disabled={!allAnswered || isSubmitting}
+            title={!allAnswered ? `还有 ${allQuestions - answeredCount} 题未答` : ""}
             className="px-6 py-2 rounded-2xl bg-mint-500 text-white font-medium text-sm
                        hover:bg-mint-600 active:bg-mint-700 disabled:opacity-30 disabled:cursor-not-allowed
                        transition-all shadow-soft"
           >
-            {isSubmitting ? "提交中..." : "提交测评"}
+            {!allAnswered
+              ? `还差 ${allQuestions - answeredCount} 题`
+              : isSubmitting ? "提交中..." : "提交测评"}
           </button>
         ) : (
           <button

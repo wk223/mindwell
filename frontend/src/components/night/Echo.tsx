@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { apiRequest } from "../../api/client";
 import NightButton from "./NightButton";
 import { pickAnswer } from "./echoAnswers";
@@ -21,16 +21,15 @@ export default function Echo() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
-  const placeholderTimer = useRef<ReturnType<typeof setInterval>>();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Rotate placeholder
-  useState(() => {
-    placeholderTimer.current = setInterval(() => {
+  // Rotate placeholder — useEffect with cleanup
+  useEffect(() => {
+    const id = setInterval(() => {
       setPlaceholderIdx((i) => (i + 1) % PLACEHOLDERS.length);
     }, 3000);
-    return () => clearInterval(placeholderTimer.current);
-  });
+    return () => clearInterval(id);
+  }, []);
 
   const handleSubmit = useCallback(async () => {
     if (!question.trim() || loading) return;
@@ -38,7 +37,7 @@ export default function Echo() {
     setError(null);
     setResult(null);
 
-    const API_TIMEOUT = 3000;
+    const API_TIMEOUT = 30000;  // LLM needs 5-15s, 30s is safe
 
     const apiCall = apiRequest<{
       answer: string;
@@ -56,7 +55,7 @@ export default function Echo() {
     const localFallback = async () => {
       await new Promise((r) => setTimeout(r, 600 + Math.random() * 800));
       const local = pickAnswer(style);
-      return { answer: local.answer, whisper: local.whisper, tags: [question.trim()] };
+      return { answer: local.answer, whisper: local.whisper, tags: local.tags };
     };
 
     try {

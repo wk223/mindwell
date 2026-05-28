@@ -144,5 +144,5 @@ export function pickAnswer(style: string) {
   const whispers = ECHO_WHISPERS[style] || ECHO_WHISPERS.late_night;
   const answer = answers[Math.floor(Math.random() * answers.length)];
   const whisper = whispers[Math.floor(Math.random() * whispers.length)];
-  return { answer, whisper };
+  return { answer, whisper, tags: ["深夜", "思考"] };
 }

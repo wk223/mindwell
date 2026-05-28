@@ -1,6 +1,5 @@
 """Seed script: create root admin user if not exists."""
 import asyncio
-import hashlib
 import os
 
 from sqlalchemy import select
@@ -8,7 +7,7 @@ from sqlalchemy import select
 from app.db.session import async_session_factory
 from app.models import assessment, community, conversation, mood, user  # noqa: F401
 from app.models.user import User
-from app.services.auth_service import pwd_context  # use the same CryptContext as auth
+from app.services.auth_service import pwd_context, _hash_email
 
 
 async def seed_root_user():
@@ -16,7 +15,7 @@ async def seed_root_user():
     password = os.getenv("ROOT_PASSWORD", "RootAdmin123!")
     nickname = os.getenv("ROOT_NICKNAME", "Root")
 
-    email_hash = hashlib.sha256(email.strip().lower().encode()).hexdigest()
+    email_hash = _hash_email(email)
 
     async with async_session_factory() as db:
         result = await db.execute(
