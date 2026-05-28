@@ -4,7 +4,9 @@ from app.db.session import engine
 from app.models.base import Base
 
 # Import models so SQLAlchemy registers all tables before create_all runs.
-from app.models import assessment, community, conversation, mood, user, user_memory  # noqa: F401
+# Order matters: mood before user (User → MoodEntry forward ref)
+from app.models import mood, user  # noqa: F401
+from app.models import assessment, community, conversation, user_memory  # noqa: F401
 
 
 async def init_db() -> None:
