@@ -2,6 +2,11 @@ from sqlalchemy import String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base, new_uuid, utcnow
 
+# Forward-referenced models must be imported before User mapper configures
+import app.models.conversation  # noqa: F401
+import app.models.mood  # noqa: F401
+import app.models.assessment  # noqa: F401
+
 import uuid
 from datetime import datetime
 
