@@ -45,18 +45,6 @@ server {
         proxy_http_version 1.1;
         proxy_set_header Host $host;
     }
-    # pgAdmin — 内部管理，路径访问
-    location /db-admin/ {
-        set $pg "pgadmin:80";
-        proxy_pass http://$pg/;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-        proxy_set_header X-Script-Name /db-admin;
-        proxy_read_timeout 120s;
-    }
 }
 NGINX
 else
