@@ -6,7 +6,7 @@ WORKDIR /app
 ENV PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
 ENV PIP_TRUSTED_HOST=pypi.tuna.tsinghua.edu.cn
 
-COPY backend/ .
+COPY . .
 
 RUN pip install --no-cache-dir \
     "fastapi[standard]" \
