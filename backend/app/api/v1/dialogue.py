@@ -60,7 +60,7 @@ async def get_conversation(
     redis: Redis = Depends(get_redis),
 ):
     service = _get_dialogue_service(db, redis)
-    history = await service.get_chat_history(conversation_id)
+    history = await service.get_chat_history(conversation_id, str(user.id))
     return {"conversation_id": conversation_id, "messages": history}
 
 
@@ -95,7 +95,7 @@ async def send_message(
         return result
 
     # Streaming: load history BEFORE saving user message (save_message overwrites Redis cache)
-    history = await service.get_chat_history(str(conv.id))
+    history = await service.get_chat_history(str(conv.id), str(user.id))
     await service.save_message(str(conv.id), "user", body.message)
 
     # Reuse the orchestrator already created in _get_dialogue_service (avoid double init)

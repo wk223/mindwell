@@ -45,8 +45,18 @@ class DialogueService:
         await self.db.refresh(conv)
         return conv
 
-    async def get_chat_history(self, conversation_id: str) -> list[dict]:
-        """Get recent messages as LLM-compatible dict list."""
+    async def get_chat_history(self, conversation_id: str, user_id: str | None = None) -> list[dict]:
+        """Get recent messages as LLM-compatible dict list. Optionally verify ownership."""
+        # Verify conversation belongs to user (defense in depth, RLS also enforces this)
+        if user_id:
+            owner_check = select(Conversation).where(
+                Conversation.id == conversation_id,
+                Conversation.user_id == user_id,
+            )
+            owner_result = await self.db.execute(owner_check)
+            if not owner_result.scalars().first():
+                return []
+
         # Try Redis cache first
         cache_key = f"chat_history:{conversation_id}"
         cached = await self.redis.lrange(cache_key, 0, -1)
