@@ -7,6 +7,17 @@ from jinja2 import Environment, FileSystemLoader, Template
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 
+# ── Module-level singleton ──
+_prompt_manager: "PromptManager | None" = None
+
+
+def get_prompt_manager() -> "PromptManager":
+    """Return the process-wide PromptManager singleton."""
+    global _prompt_manager
+    if _prompt_manager is None:
+        _prompt_manager = PromptManager()
+    return _prompt_manager
+
 
 class PromptManager:
     """Loads, versions, and renders prompt templates with ICL example injection."""

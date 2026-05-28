@@ -8,7 +8,7 @@ from app.core.agents.crisis_detector import CrisisDetectionAgent
 from app.core.agents.emotional_support import EmotionalSupportAgent
 from app.core.agents.protocol import AgentMessage, AgentResponse
 from app.core.llm.client import LLMClient
-from app.core.prompts.manager import PromptManager
+from app.core.prompts.manager import get_prompt_manager
 from app.core.safety.rule_engine import SafetyFlag
 from app.core.safety.safety_pipeline import SafetyPipeline, SafetyAction
 
@@ -27,11 +27,11 @@ class AgentOrchestrator:
         self,
         llm: LLMClient,
         safety_pipeline: SafetyPipeline,
-        prompt_manager: PromptManager | None = None,
+        prompt_manager=None,  # deprecated — uses singleton internally
     ):
         self.llm = llm
         self.safety_pipeline = safety_pipeline
-        self.prompt_manager = prompt_manager or PromptManager()
+        self.prompt_manager = get_prompt_manager()
 
         self.crisis_agent = CrisisDetectionAgent(llm, self.prompt_manager)
         self.emotional_agent = EmotionalSupportAgent(llm, self.prompt_manager)

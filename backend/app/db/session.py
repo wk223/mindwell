@@ -3,7 +3,15 @@ from app.config import get_settings
 
 settings = get_settings()
 
-engine = create_async_engine(settings.database_url, echo=settings.app_debug, pool_size=10, max_overflow=20)
+# echo=True floods stdout with SQL in dev; only enable when explicitly debugging
+_echo_sql = settings.app_debug and settings.app_env == "development"
+
+engine = create_async_engine(
+    settings.database_url,
+    echo=_echo_sql,
+    pool_size=10,
+    max_overflow=20,
+)
 
 async_session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 

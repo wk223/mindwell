@@ -94,15 +94,12 @@ async def send_message(
         result = await service.process_message(str(user.id), str(conv.id), body.message)
         return result
 
-    # Streaming: save user message here (process_stream doesn't handle it)
-    await service.save_message(str(conv.id), "user", body.message)
+    # Streaming: load history BEFORE saving user message (save_message overwrites Redis cache)
     history = await service.get_chat_history(str(conv.id))
+    await service.save_message(str(conv.id), "user", body.message)
 
-    # Streaming SSE response — reuse singletons
-    llm = get_llm_client()
-    rule_engine = get_rule_engine()
-    safety = SafetyPipeline(redis, rule_engine)
-    orchestrator = AgentOrchestrator(llm, safety)
+    # Reuse the orchestrator already created in _get_dialogue_service (avoid double init)
+    orchestrator = service.orchestrator
 
     async def event_stream():
         full_response = ""

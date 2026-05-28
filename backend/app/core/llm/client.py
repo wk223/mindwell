@@ -36,7 +36,8 @@ class LLMClient:
                 "Authorization": f"Bearer {self._settings.llm_api_key}",
                 "Content-Type": "application/json",
             },
-            timeout=60.0,
+            timeout=httpx.Timeout(10.0, read=90.0),  # 10s connect, 90s read for streaming
+            limits=httpx.Limits(max_keepalive_connections=20, max_connections=50),
         )
 
     @property
@@ -76,7 +77,7 @@ class LLMClient:
         temperature: float | None = None,
         max_tokens: int | None = None,
     ) -> AsyncIterator[str]:
-        """Streaming chat completion yielding tokens."""
+        """Streaming chat completion with 1 retry on transient errors."""
         payload = {
             "model": self.model,
             "messages": messages,
@@ -85,24 +86,35 @@ class LLMClient:
             "stream": True,
         }
 
-        async with self._client.stream(
-            "POST", "/chat/completions", json=payload
-        ) as resp:
-            resp.raise_for_status()
-            async for line in resp.aiter_lines():
-                if line.startswith("data: "):
-                    data = line[6:].strip()
-                    if data == "[DONE]":
-                        break
-                    try:
-                        import json
-                        chunk = json.loads(data)
-                        delta = chunk.get("choices", [{}])[0].get("delta", {})
-                        content = delta.get("content", "")
-                        if content:
-                            yield content
-                    except (json.JSONDecodeError, KeyError, IndexError):
-                        continue
+        last_exc: Exception | None = None
+        for attempt in range(2):
+            try:
+                async with self._client.stream(
+                    "POST", "/chat/completions", json=payload
+                ) as resp:
+                    resp.raise_for_status()
+                    async for line in resp.aiter_lines():
+                        if line.startswith("data: "):
+                            data = line[6:].strip()
+                            if data == "[DONE]":
+                                return  # success — stop generator
+                            try:
+                                import json as _json
+                                chunk = _json.loads(data)
+                                delta = chunk.get("choices", [{}])[0].get("delta", {})
+                                content = delta.get("content", "")
+                                if content:
+                                    yield content
+                            except (_json.JSONDecodeError, KeyError, IndexError):
+                                continue
+                    return  # stream completed normally
+            except (httpx.TimeoutException, httpx.HTTPStatusError, httpx.ConnectError) as e:
+                last_exc = e
+                if attempt == 0:
+                    await asyncio.sleep(1.0)  # brief backoff before retry
+                continue
+
+        raise last_exc or RuntimeError("Stream failed after retry")
 
     async def close(self):
         await self._client.aclose()
