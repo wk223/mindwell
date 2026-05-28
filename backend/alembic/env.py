@@ -7,6 +7,7 @@ from app.models.conversation import Conversation, Message, SafetyEvent
 from app.models.mood import MoodEntry
 from app.models.assessment import Assessment
 from app.models.community import Post, Comment
+from app.models.user_memory import UserMemory
 
 target_metadata = Base.metadata
 

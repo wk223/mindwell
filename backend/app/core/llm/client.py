@@ -5,9 +5,28 @@ import httpx
 
 from app.config import get_settings, Settings
 
+# ── Module-level singleton ──
+_llm_client: "LLMClient | None" = None
+
+
+def get_llm_client() -> "LLMClient":
+    """Return the process-wide LLMClient singleton. Created on first call."""
+    global _llm_client
+    if _llm_client is None:
+        _llm_client = LLMClient()
+    return _llm_client
+
+
+async def close_llm_client():
+    """Gracefully close the singleton LLMClient (called on shutdown)."""
+    global _llm_client
+    if _llm_client is not None:
+        await _llm_client.close()
+        _llm_client = None
+
 
 class LLMClient:
-    """OpenAI-compatible async chat client."""
+    """OpenAI-compatible async chat client — use `get_llm_client()` to get the singleton."""
 
     def __init__(self, settings: Settings | None = None):
         self._settings = settings or get_settings()

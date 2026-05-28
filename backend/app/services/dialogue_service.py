@@ -212,9 +212,7 @@ class DialogueService:
         )
 
         # Save AI response
-        agent_id = "emotional_support"
-        if response.agent_trace:
-            agent_id = response.agent_trace[0].agent_id
+        agent_id = response.agent_trace[0].agent_id if response.agent_trace else "emotional_support"
 
         ai_msg = await self.save_message(
             str(conv.id),

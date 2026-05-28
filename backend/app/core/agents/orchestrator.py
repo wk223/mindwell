@@ -87,8 +87,11 @@ class AgentOrchestrator:
         trace.append(primary_response)
 
         if crisis_task:
-            crisis_response = await crisis_task
-            trace.append(crisis_response)
+            try:
+                crisis_response = await crisis_task
+                trace.append(crisis_response)
+            except Exception:
+                pass  # Crisis detection failure must not break the main flow
 
         # Safety check on output
         output_safety = await self.safety_pipeline.process_output(primary_response.content)
@@ -118,22 +121,20 @@ class AgentOrchestrator:
         chat_history: list[dict],
         context: dict | None = None,
     ) -> AsyncIterator[dict]:
-        """Streaming processing pipeline. Yields token events, safety events, and final done event."""
-        # Safety check first
+        """Streaming pipeline — mirrors `process()`: safety → crisis detection → intent routing → output check."""
         safety_result = await self.safety_pipeline.process_input(user_id, user_message)
 
+        # ── Crisis HALT ──
         if safety_result.action == SafetyAction.HALT:
             yield {
                 "type": "safety",
-                "flags": [
-                    {"rule_id": f.rule_id, "severity": f.severity} for f in safety_result.flags
-                ],
+                "flags": [{"rule_id": f.rule_id, "severity": f.severity} for f in safety_result.flags],
                 "crisis_response": safety_result.crisis_response,
             }
             yield {"type": "done", "message": safety_result.crisis_response}
             return
 
-        # Yield safety flags if any
+        # ── Yield early safety flags ──
         if safety_result.flags:
             yield {
                 "type": "safety",
@@ -145,23 +146,41 @@ class AgentOrchestrator:
 
         intent = self._classify_intent(safety_result.sanitized_text)
 
-        # Stream from primary agent
+        # ── Run crisis detection in parallel (same as process()) ──
+        if safety_result.flags:
+            crisis_task = None  # rule engine already flagged — skip LLM re-check
+        else:
+            crisis_task = asyncio.create_task(
+                self.crisis_agent.process(safety_result.sanitized_text, chat_history, context)
+            )
+
+        # ── Stream from primary agent ──
+        # Assessment agent doesn't support streaming yet — fall back to emotional
+        if intent == "assessment" and hasattr(self.assessment_agent, "process_stream"):
+            stream = self.assessment_agent.process_stream(safety_result.sanitized_text, chat_history, context)
+        else:
+            stream = self.emotional_agent.process_stream(safety_result.sanitized_text, chat_history, context)
+
         full_response = ""
-        async for token in self.emotional_agent.process_stream(
-            safety_result.sanitized_text, chat_history, context
-        ):
+        async for token in stream:
             full_response += token
             yield {"type": "token", "content": token}
 
-        # Output safety check
+        # ── Await crisis task ──
+        if crisis_task:
+            try:
+                await crisis_task
+            except Exception:
+                pass  # Crisis detection failure must not break the main flow
+
+        # ── Output safety check ──
         output_safety = await self.safety_pipeline.process_output(full_response)
         if output_safety.action == SafetyAction.OVERRIDE:
-            yield {"type": "override"}
+            full_response = "I apologize, but I can't provide that response. Let me refocus on supporting you. How are you feeling right now?"
+            yield {"type": "override", "message": full_response}
 
-        # Escalation message
+        # ── Escalation message ──
         if safety_result.escalation_message:
-            for char in safety_result.escalation_message:
-                yield {"type": "token", "content": char}
             full_response += safety_result.escalation_message
 
         yield {

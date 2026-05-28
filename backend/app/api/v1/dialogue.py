@@ -17,8 +17,9 @@ from app.schemas.dialogue import (
 )
 from app.services.dialogue_service import DialogueService
 from app.core.agents.orchestrator import AgentOrchestrator
-from app.core.safety.safety_pipeline import SafetyPipeline, RuleEngine
-from app.core.llm.client import LLMClient
+from app.core.safety.safety_pipeline import SafetyPipeline
+from app.core.safety.rule_engine import get_rule_engine
+from app.core.llm.client import get_llm_client
 
 
 router = APIRouter(prefix="/dialogue", tags=["dialogue"])
@@ -28,8 +29,9 @@ def _get_dialogue_service(
     db: AsyncSession = Depends(get_db),
     redis: Redis = Depends(get_redis),
 ) -> DialogueService:
-    llm = LLMClient()
-    rule_engine = RuleEngine()
+    # Use process-wide singletons — no more per-request httpx.AsyncClient creation
+    llm = get_llm_client()
+    rule_engine = get_rule_engine()
     safety = SafetyPipeline(redis, rule_engine)
     orchestrator = AgentOrchestrator(llm, safety)
     return DialogueService(orchestrator, safety, db, redis)
@@ -85,20 +87,20 @@ async def send_message(
 ):
     service = _get_dialogue_service(db, redis)
 
-    # Save user message and get conversation
-    from app.models.conversation import Conversation
     conv = await service.get_or_create_conversation(str(user.id), body.conversation_id)
-    await service.save_message(str(conv.id), "user", body.message)
-    history = await service.get_chat_history(str(conv.id))
 
     if not body.stream:
-        # Non-streaming response
+        # Non-streaming: process_message() handles save internally
         result = await service.process_message(str(user.id), str(conv.id), body.message)
         return result
 
-    # Streaming SSE response
-    llm = LLMClient()
-    rule_engine = RuleEngine()
+    # Streaming: save user message here (process_stream doesn't handle it)
+    await service.save_message(str(conv.id), "user", body.message)
+    history = await service.get_chat_history(str(conv.id))
+
+    # Streaming SSE response — reuse singletons
+    llm = get_llm_client()
+    rule_engine = get_rule_engine()
     safety = SafetyPipeline(redis, rule_engine)
     orchestrator = AgentOrchestrator(llm, safety)
 
@@ -128,8 +130,7 @@ async def send_message(
 
         except Exception as e:
             yield f"data: {json.dumps({'type': 'error', 'detail': str(e)})}\n\n"
-        finally:
-            await llm.close()
+        # Note: llm is the process-wide singleton — NOT closed here
 
     return StreamingResponse(
         event_stream(),

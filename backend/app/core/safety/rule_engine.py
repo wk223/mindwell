@@ -1,3 +1,4 @@
+import os
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -16,9 +17,24 @@ class SafetyFlag:
 
 
 class RuleEngine:
+    """Crisis-detection rule engine — process-wide singleton to avoid repeated disk I/O."""
+
+    _instance: "RuleEngine | None" = None
+    _rules_path: str | None = None
+
+    def __new__(cls, rules_path: str | None = None):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
     def __init__(self, rules_path: str | None = None):
+        # Only load from disk once — subsequent calls are no-ops
+        if hasattr(self, "_initialized") and self._initialized:
+            return
+
         if rules_path is None:
             rules_path = str(Path(__file__).parent / "rules.yaml")
+        self.__class__._rules_path = rules_path
 
         with open(rules_path, encoding="utf-8") as f:
             self.config = yaml.safe_load(f)
@@ -33,6 +49,8 @@ class RuleEngine:
                 re.compile(pattern, re.IGNORECASE) for pattern in rule["patterns"]
             ]
             self._compiled.append((rule, compiled_patterns))
+
+        self._initialized = True
 
     def detect(self, text: str) -> list[SafetyFlag]:
         """Run all rules against text. Returns matched flags sorted by severity."""
@@ -83,3 +101,8 @@ class RuleEngine:
         if most_severe.response_template:
             return most_severe.response_template
         return None
+
+
+def get_rule_engine() -> RuleEngine:
+    """Return the process-wide RuleEngine singleton."""
+    return RuleEngine()

@@ -1,5 +1,8 @@
 const API_BASE = "/api/v1";
 
+// ── 401 auto-logout event ──
+export const AUTH_EXPIRED_EVENT = "mindwell:auth-expired";
+
 class ApiError extends Error {
   status: number;
   constructor(message: string, status: number) {
@@ -41,6 +44,9 @@ export async function apiRequest<T>(
   });
 
   if (!res.ok) {
+    if (res.status === 401) {
+      window.dispatchEvent(new CustomEvent(AUTH_EXPIRED_EVENT));
+    }
     const body = await res.json().catch(() => ({ detail: res.statusText }));
     throw new ApiError(body.detail || res.statusText, res.status);
   }
