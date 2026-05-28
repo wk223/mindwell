@@ -1,11 +1,11 @@
 import json
-from datetime import datetime, timezone
 from uuid import UUID
 
 from sqlalchemy import select, func, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
+from app.models.base import utcnow
 from app.models.conversation import Conversation, Message
 from app.core.agents.orchestrator import AgentOrchestrator
 from app.core.safety.safety_pipeline import SafetyPipeline, SafetyAction
@@ -90,7 +90,7 @@ class DialogueService:
         result = await self.db.execute(stmt)
         conv = result.scalars().first()
         if conv:
-            conv.updated_at = datetime.now(timezone.utc)
+            conv.updated_at = utcnow()
             if conv.title is None and role == "user":
                 conv.title = content[:100]
 
