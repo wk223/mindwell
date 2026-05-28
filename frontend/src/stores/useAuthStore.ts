@@ -25,9 +25,23 @@ function getStoredToken(): string | null {
   if (!token) return null;
   if (isTokenExpired(token)) {
     localStorage.removeItem("mindwell_token");
+    localStorage.removeItem("mindwell_user");
     return null;
   }
   return token;
+}
+
+function getStoredUser(): User | null {
+  try {
+    const raw = localStorage.getItem("mindwell_user");
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveUser(user: User) {
+  localStorage.setItem("mindwell_user", JSON.stringify(user));
 }
 
 interface AuthState {
@@ -41,7 +55,7 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
+  user: getStoredUser(),
   isLoading: false,
   isAuthenticated: !!getStoredToken(),
 
@@ -49,6 +63,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true });
     try {
       const res = await authApi.login(email, password);
+      saveUser(res.user);
       set({ user: res.user, isAuthenticated: true, isLoading: false });
     } catch (e) {
       set({ isLoading: false });
@@ -60,6 +75,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true });
     try {
       const res = await authApi.register(nickname, email, password);
+      saveUser(res.user);
       set({ user: res.user, isAuthenticated: true, isLoading: false });
     } catch (e) {
       set({ isLoading: false });
@@ -69,6 +85,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: () => {
     authApi.logout();
+    localStorage.removeItem("mindwell_user");
     set({ user: null, isAuthenticated: false });
   },
 }));
