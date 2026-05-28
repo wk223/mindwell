@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
 from app.models.base import utcnow
-from app.models.conversation import Conversation, Message
+from app.models.conversation import Conversation, Message, SafetyEvent
 from app.core.agents.orchestrator import AgentOrchestrator
 from app.core.safety.safety_pipeline import SafetyPipeline, SafetyAction
 
@@ -132,6 +132,23 @@ class DialogueService:
         ]
 
     async def delete_conversation(self, user_id: str, conversation_id: str) -> bool:
+        # Get message IDs for this conversation
+        msg_ids_stmt = select(Message.id).where(Message.conversation_id == conversation_id)
+        msg_ids_result = await self.db.execute(msg_ids_stmt)
+        msg_ids = [row[0] for row in msg_ids_result.all()]
+
+        # Delete safety events referencing these messages
+        if msg_ids:
+            await self.db.execute(
+                delete(SafetyEvent).where(SafetyEvent.message_id.in_(msg_ids))
+            )
+
+        # Delete messages
+        await self.db.execute(
+            delete(Message).where(Message.conversation_id == conversation_id)
+        )
+
+        # Delete conversation
         stmt = delete(Conversation).where(
             Conversation.id == conversation_id, Conversation.user_id == user_id
         )
