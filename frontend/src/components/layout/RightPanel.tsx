@@ -1,12 +1,10 @@
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
 const easeOut = [0.25, 0.1, 0.25, 1] as const;
-const easeSpring = [0.34, 1.56, 0.64, 1] as const;
 
 const stagger = {
-  animate: {
-    transition: { staggerChildren: 0.1 },
-  },
+  animate: { transition: { staggerChildren: 0.1 } },
 };
 
 const itemAnim = {
@@ -15,6 +13,8 @@ const itemAnim = {
 };
 
 export default function RightPanel() {
+  const navigate = useNavigate();
+
   return (
     <motion.aside
       initial={{ opacity: 0, x: 20 }}
@@ -22,7 +22,6 @@ export default function RightPanel() {
       transition={{ duration: 0.8, ease: easeOut, delay: 0.3 }}
       className="w-[260px] shrink-0 flex flex-col h-full relative overflow-hidden"
     >
-      {/* Background */}
       <div className="absolute inset-0 bg-void-900/70" />
       <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-white/[0.04] to-transparent" />
 
@@ -57,10 +56,6 @@ export default function RightPanel() {
                 />
               ))}
             </div>
-            <div className="flex justify-between mt-2 text-[10px] text-slate-600">
-              <span>周一</span>
-              <span>周日</span>
-            </div>
           </motion.section>
 
           {/* Daily quote */}
@@ -71,19 +66,22 @@ export default function RightPanel() {
             </p>
           </motion.section>
 
-          {/* Quick actions */}
+          {/* Quick actions — real links */}
           <motion.section variants={itemAnim} className="glass rounded-2xl p-4 card-texture">
             <p className="text-[11px] uppercase tracking-widest text-slate-500 mb-3">快捷入口</p>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {[
-                { label: "开始倾诉", emoji: "💭" },
-                { label: "ECHO 答案之书", emoji: "📖" },
-                { label: "呼吸练习", emoji: "🧘" },
-              ].map((action, i) => (
+                { label: "开始倾诉", to: "/chat", emoji: "💭" },
+                { label: "ECHO 答案之书", to: "/echo", emoji: "📖" },
+                { label: "深夜小智", to: "/night", emoji: "🌙" },
+                { label: "情绪日记", to: "/mood", emoji: "📝" },
+                { label: "心理测评", to: "/assessment", emoji: "🧩" },
+              ].map((action) => (
                 <motion.button
-                  key={i}
+                  key={action.to}
                   whileHover={{ x: 4, backgroundColor: "rgba(255,255,255,0.04)" }}
                   whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate(action.to)}
                   className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-slate-400
                              hover:text-slate-200 transition-colors duration-300 text-left"
                 >
