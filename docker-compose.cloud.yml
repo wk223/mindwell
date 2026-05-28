@@ -111,22 +111,16 @@ services:
         limits:
           memory: 128M
 
-  # pgAdmin — PostgreSQL 可视化管理 → http://121.4.44.210:5050
-  # 默认登录: admin@mindwell.local / admin123
-  pgadmin:
-    image: dpage/pgadmin4:latest
+  # pgweb — 轻量 PostgreSQL 可视化管理 → http://121.4.44.210:5050
+  pgweb:
+    image: sosedoff/pgweb:latest
     restart: always
     depends_on:
       - postgres
     ports:
-      - "5050:80"
+      - "5050:8081"
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@mindwell.com
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
-      PGADMIN_CONFIG_SERVER_MODE: "False"
-      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
+      PGWEB_DATABASE_URL: postgres://${POSTGRES_USER:-mindwell}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-mindwell}?sslmode=disable
     networks:
       - mindwell
 
@@ -162,7 +156,6 @@ services:
 volumes:
   pgdata:
   redis_data:
-  pgadmin_data:
 
 networks:
   mindwell:
