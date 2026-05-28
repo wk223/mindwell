@@ -116,11 +116,12 @@ services:
     image: sosedoff/pgweb:latest
     restart: always
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     ports:
       - "5050:8081"
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER:-mindwell}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-mindwell}?sslmode=disable
+      PGWEB_DATABASE_URL: postgres://${POSTGRES_USER:-mindwell}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-mindwell}?sslmode=disable
     networks:
       - mindwell
 
