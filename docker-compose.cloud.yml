@@ -120,7 +120,7 @@ services:
     ports:
       - "5050:8081"
     environment:
-      PGWEB_DATABASE_URL: postgres://${POSTGRES_USER:-mindwell}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-mindwell}?sslmode=disable
+      DATABASE_URL: postgres://${POSTGRES_USER:-mindwell}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-mindwell}?sslmode=disable
     networks:
       - mindwell
 
