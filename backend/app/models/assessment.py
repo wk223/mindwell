@@ -16,6 +16,6 @@ class Assessment(Base):
     severity_level: Mapped[str] = mapped_column(String(30), nullable=True)
     interpretation: Mapped[str] = mapped_column(Text, nullable=True)
     answers: Mapped[dict] = mapped_column(JSONB, nullable=False)
-    completed_at: Mapped[datetime] = mapped_column(default=utcnow)
+    completed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     user = relationship("User", back_populates="assessments")
