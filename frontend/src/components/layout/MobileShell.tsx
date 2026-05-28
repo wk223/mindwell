@@ -3,10 +3,10 @@ import { useAuthStore } from "../../stores/useAuthStore";
 import { cn } from "../../utils/cn";
 
 const tabs = [
+  { to: "/home", label: "首页", icon: HomeTabIcon },
   { to: "/chat", label: "倾诉", icon: ChatTabIcon },
   { to: "/mood", label: "心情", icon: MoodTabIcon },
   { to: "/night", label: "小智", icon: NightTabIcon },
-  { to: "/assessment", label: "测评", icon: AssessmentTabIcon },
   { to: "/echo", label: "ECHO", icon: EchoTabIcon },
 ];
 
@@ -65,6 +65,15 @@ export default function MobileShell({ children }: { children: React.ReactNode })
         ))}
       </nav>
     </div>
+  );
+}
+
+function HomeTabIcon(a: boolean) {
+  return (
+    <svg className="w-5 h-5" fill={a ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={a ? 0 : 1.5}
+        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+    </svg>
   );
 }
 

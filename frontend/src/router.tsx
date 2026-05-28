@@ -21,14 +21,14 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 
 function GuestRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  if (isAuthenticated) return <Navigate to="/chat" replace />;
+  if (isAuthenticated) return <Navigate to="/home" replace />;
   return <>{children}</>;
 }
 
 export default function AppRouter() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/chat" replace />} />
+      <Route path="/" element={<Navigate to="/home" replace />} />
       <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
       <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
       <Route path="/chat" element={<PrivateRoute><AppShell><ChatPage /></AppShell></PrivateRoute>} />

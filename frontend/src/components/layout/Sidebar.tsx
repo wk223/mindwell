@@ -12,6 +12,7 @@ interface SidebarProps {
 }
 
 const navItems = [
+  { to: "/home", label: "首页", icon: HomeIcon },
   { to: "/chat", label: "倾诉", icon: ChatIcon },
   { to: "/echo", label: "ECHO · 答案之书", icon: EchoIcon },
   { to: "/mood", label: "情绪日记", icon: MoodIcon },
@@ -212,6 +213,15 @@ export default function Sidebar({ userNickname, onLogout }: SidebarProps) {
 }
 
 /* ── Icons ── */
+
+function HomeIcon() {
+  return (
+    <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+    </svg>
+  );
+}
 
 function ChatIcon() {
   return (
