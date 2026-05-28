@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { useAssessmentStore } from "../../stores/useAssessmentStore";
+import { useAuthStore } from "../../stores/useAuthStore";
 import { cn } from "../../utils/cn";
 import type { Question, ScaleOption } from "../../types/assessment";
 
@@ -14,6 +15,8 @@ export default function ScaleQuestion() {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<"fwd" | "back">("fwd");
+
+  const isRoot = useAuthStore((s) => s.user?.nickname === "Root");
 
   if (!currentScale) return null;
 
@@ -43,6 +46,8 @@ export default function ScaleQuestion() {
   const fillAll = () => {
     const maxVal = Math.max(...currentScale.options.map((o) => o.value));
     questions.forEach((q) => setAnswer(q.id, maxVal));
+    // Auto-submit after filling all answers
+    setTimeout(() => submit(currentScale.id, selectedType ?? undefined), 100);
   };
 
   return (
@@ -136,15 +141,15 @@ export default function ScaleQuestion() {
         )}
       </div>
 
-      {/* Quick fill */}
-      {answeredCount < total && (
+      {/* Quick fill — root only */}
+      {isRoot && answeredCount < total && (
         <div className="mt-4 text-center">
           <button
             type="button"
             onClick={fillAll}
-            className="text-xs text-gray-400 hover:text-mint-500 underline underline-offset-2 transition-colors"
+            className="text-xs text-slate-600 hover:text-moon-400 underline underline-offset-2 transition-colors"
           >
-            一键填充(测试用)
+            一键填充并提交 (Root)
           </button>
         </div>
       )}
