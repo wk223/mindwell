@@ -45,10 +45,10 @@ export default function MoodCheckin() {
 
   return (
     <div className="glass-card p-6">
-      <h2 className="text-base font-semibold text-gray-800 mb-1">
+      <h2 className="text-base font-semibold text-slate-200 mb-1">
         {submitted ? "今日心情" : "今天感觉怎么样？"}
       </h2>
-      <p className="text-sm text-gray-500 mb-6">
+      <p className="text-sm text-slate-500 mb-6">
         {submitted ? "你已完成今日打卡" : "选择一个最能代表你此刻心情的表情"}
       </p>
 
@@ -62,20 +62,20 @@ export default function MoodCheckin() {
             className={cn(
               "flex flex-col items-center gap-1 p-2 rounded-2xl transition-all",
               score === val
-                ? "scale-125 bg-mint-100 ring-2 ring-mint-300"
-                : "hover:scale-110 hover:bg-cream-100",
+                ? "scale-125 bg-white/[0.1] ring-2 ring-moon-400/50"
+                : "hover:scale-110 hover:bg-white/[0.05]",
               submitted && "cursor-default"
             )}
             title={MOOD_LABELS[val]}
           >
             <span className="text-2xl">{MOOD_EMOJIS[val]}</span>
-            <span className="text-xs text-gray-400">{val}</span>
+            <span className="text-xs text-slate-500">{val}</span>
           </button>
         ))}
       </div>
 
       {score && (
-        <p className="text-center text-gray-700 font-medium mb-4">
+        <p className="text-center text-slate-300 font-medium mb-4">
           {MOOD_EMOJIS[score]} {MOOD_LABELS[score]}
         </p>
       )}
@@ -83,7 +83,7 @@ export default function MoodCheckin() {
       {!submitted && (
         <>
           <div className="mb-4">
-            <p className="text-sm font-medium text-gray-700 mb-2">影响因素（可选）</p>
+            <p className="text-sm font-medium text-slate-400 mb-2">影响因素（可选）</p>
             <div className="flex flex-wrap gap-2">
               {COMMON_TAGS.map((tag) => (
                 <button
@@ -92,8 +92,8 @@ export default function MoodCheckin() {
                   className={cn(
                     "px-3 py-1 rounded-full text-xs font-medium transition-colors",
                     selectedTags.includes(tag)
-                      ? "bg-mint-100 text-mint-700 border border-mint-200"
-                      : "bg-cream-100 text-gray-500 border border-cream-200 hover:bg-cream-200"
+                      ? "bg-moon-400/20 text-moon-300 border border-moon-400/30"
+                      : "bg-white/[0.04] text-slate-500 border border-white/[0.06] hover:bg-white/[0.08]"
                   )}
                 >
                   {tag}
@@ -103,32 +103,33 @@ export default function MoodCheckin() {
           </div>
 
           <div className="mb-4">
-            <p className="text-sm font-medium text-gray-700 mb-2">心情日记（可选）</p>
+            <p className="text-sm font-medium text-slate-400 mb-2">心情日记（可选）</p>
             <textarea
               value={journal}
               onChange={(e) => setJournal(e.target.value)}
               placeholder="写下你想记录的..."
               rows={3}
               maxLength={2000}
-              className="w-full rounded-2xl bg-cream-100 border border-cream-300 px-4 py-2.5 text-sm resize-none
-                         focus:outline-none focus:ring-2 focus:ring-mint-300 focus:border-transparent
-                         placeholder:text-gray-400"
+              className="w-full rounded-2xl bg-white/[0.04] border border-white/[0.08] px-4 py-2.5 text-sm resize-none
+                         text-slate-200 placeholder:text-slate-600
+                         focus:outline-none focus:ring-2 focus:ring-moon-400/30 focus:border-transparent
+                         transition-all"
             />
           </div>
 
           {error && (
-            <p className="text-red-500 text-sm mb-3 bg-red-50 px-3 py-2 rounded-xl">
+            <p className="text-rose-300 text-sm mb-3 bg-rose-500/10 px-3 py-2 rounded-xl border border-rose-400/15">
               {error}
-              <button onClick={clearError} className="ml-2 underline">关闭</button>
+              <button onClick={clearError} className="ml-2 underline hover:text-rose-200">关闭</button>
             </p>
           )}
 
           <button
             onClick={handleSubmit}
             disabled={score === null || isSubmitting}
-            className="w-full py-2.5 rounded-2xl bg-mint-500 text-white text-sm font-medium
-                       hover:bg-mint-600 active:bg-mint-700
-                       disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-soft"
+            className="w-full py-2.5 rounded-2xl bg-moon-400/90 text-void-900 text-sm font-medium
+                       hover:bg-moon-400 active:bg-moon-500
+                       disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-glow-md"
           >
             {isSubmitting ? "提交中..." : "记录心情"}
           </button>

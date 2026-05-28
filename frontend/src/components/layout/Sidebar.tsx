@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../../utils/cn";
@@ -39,8 +39,10 @@ export default function Sidebar({ userNickname, onLogout }: SidebarProps) {
   const createNewChat = useDialogueStore((s) => s.createNewChat);
   const deleteConversation = useDialogueStore((s) => s.deleteConversation);
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    loadConversations();
+    loadConversations().finally(() => setLoading(false));
   }, [loadConversations]);
 
   return (
@@ -147,7 +149,19 @@ export default function Sidebar({ userNickname, onLogout }: SidebarProps) {
             )}
           </AnimatePresence>
 
-          {conversations.length === 0 && (
+          {loading && conversations.length === 0 && (
+            <div className="px-3 space-y-0.5">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="h-9 rounded-lg bg-white/[0.03] animate-pulse"
+                  style={{ width: `${60 + i * 10}%` }}
+                />
+              ))}
+            </div>
+          )}
+
+          {!loading && conversations.length === 0 && (
             <div className="text-center py-8">
               <p className="text-xs text-slate-600 leading-relaxed">
                 还没有对话

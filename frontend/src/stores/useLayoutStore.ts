@@ -8,7 +8,7 @@ interface LayoutState {
 }
 
 export const useLayoutStore = create<LayoutState>((set) => ({
-  isMobile: window.innerWidth < 1024,
+  isMobile: typeof window !== "undefined" ? window.innerWidth < 1024 : false,
   manualOverride: false,
   toggle: () =>
     set((s) => {
