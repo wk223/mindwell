@@ -77,6 +77,32 @@ export default function ChatContainer() {
               >
                 你不用组织语言，想到什么都可以说。
               </motion.p>
+
+              {/* Quick suggestion chips */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8, duration: 0.6 }}
+                className="mt-8 flex flex-wrap justify-center gap-2.5"
+              >
+                {[
+                  "今天有什么有趣的事情分享吗",
+                  "今天过得怎么样呀",
+                  "最近有什么让你开心的事",
+                  "有什么想跟我聊聊的吗",
+                ].map((phrase) => (
+                  <button
+                    key={phrase}
+                    onClick={() => sendMessage(phrase)}
+                    className="px-4 py-2 rounded-full text-sm text-slate-400
+                               bg-white/[0.03] border border-white/[0.05]
+                               hover:bg-white/[0.06] hover:text-slate-200 hover:border-white/[0.1]
+                               transition-all duration-300"
+                  >
+                    {phrase}
+                  </button>
+                ))}
+              </motion.div>
             </motion.div>
           )}
 
