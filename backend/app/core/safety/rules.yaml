@@ -1,0 +1,117 @@
+# Crisis Detection Rules
+# severity: critical -> halt pipeline, immediate escalation
+# severity: high -> flag, continue with safety prompt injection
+# severity: medium -> log, monitor
+
+rules:
+  # ---- SELF-HARM & SUICIDE ----
+  - id: suicide_imminent
+    patterns:
+      - "(我要|准备|打算|计划).{0,4}(自杀|去死|结束生命|离开这个世界)"
+      - "(马上|现在|今天就|今晚就).{0,4}(自杀|结束|了断)"
+      - "(不想活|活不下去|活够了|生无可恋)"
+      - "suicide\s*(plan|method|attempt|today|now)"
+      - "(遗书|遗嘱).{0,4}(写好了|准备好了)"
+      - "(告别|永别).{0,2}(这个世界|所有人|大家)"
+    severity: critical
+    action: halt_and_escalate
+    response_template: crisis_imminent
+
+  - id: suicide_ideation
+    patterns:
+      - "(不想|懒得).{0,2}(活|活下去了|存在|继续)"
+      - "(真希望|要是|如果).{0,2}(我死了|我不在了|我消失)"
+      - "(活着|人生|生命).{0,4}(没有意义|没意义|毫无意义|好累|太累)"
+      - "(死了|消失|不在).{0,2}(就好了|算了|就轻松了)"
+      - "(伤害|伤害了|伤害过).{0,3}(自己|我自己)"
+    severity: high
+    action: flag_and_refer
+    response_template: crisis_ideation
+
+  - id: self_harm_active
+    patterns:
+      - "(割腕|割伤|划伤|自残|伤害自己)"
+      - "(烧自己|烫自己|打自己|撞墙|撞头)"
+      - "(故意|刻意).{0,3}(伤害|弄伤|弄痛)"
+    severity: critical
+    action: halt_and_escalate
+    response_template: crisis_imminent
+
+  # ---- HARM TO OTHERS ----
+  - id: harm_to_others
+    patterns:
+      - "(我要|准备|打算).{0,4}(杀人|伤人|报复|害人)"
+      - "(杀了|弄死|干掉).{0,3}(他|她|他们|某个人)"
+      - "(暴力|报复).{0,3}(社会|所有人)"
+    severity: critical
+    action: halt_and_escalate
+    response_template: harm_others
+
+  # ---- ABUSE DISCLOSURE ----
+  - id: abuse_disclosure
+    patterns:
+      - "(被|遭受|经历).{0,4}(虐待|家暴|暴力|侵犯|性侵|猥亵)"
+      - "(家庭暴力|校园霸凌|职场霸凌|网络暴力)"
+      - "(不敢|害怕).{0,3}(回家|去学校|上班)"
+    severity: high
+    action: flag_and_support
+    response_template: abuse_support
+
+  # ---- SEVERE MENTAL HEALTH CRISIS ----
+  - id: severe_psychiatric
+    patterns:
+      - "(幻觉|幻听|妄想).{0,4}(听到|看到|感觉到)"
+      - "(有人在监视|有人在跟踪|有人要害我)"
+      - "(控制不住|不受控制).{0,3}(想要|去伤害)"
+    severity: high
+    action: flag_and_refer
+    response_template: psychiatric_referral
+
+# Response Templates
+responses:
+  crisis_imminent: |
+    [安全提示] 我能感受到你现在正经历非常艰难的时刻。你的安全是最重要的。
+
+    请立即联系以下专业支持：
+    - 全国心理援助热线：400-161-9995
+    - 北京心理危机研究与干预中心：010-82951332
+    - 生命热线：400-821-1215
+    - 或拨打 110 / 120 寻求紧急援助
+
+    你不需要一个人面对这些。专业的帮助就在你身边，请现在打电话给他们。
+
+  crisis_ideation: |
+    [关怀提示] 我能感受到你现在的痛苦和绝望。这些感受是真实的，但你不是一个人在面对。
+
+    如果你需要更专业的支持，可以联系：
+    - 全国心理援助热线：400-161-9995（24小时）
+    - 简单心理倾诉热线：400-650-6025
+
+    你愿意和我多聊聊你现在的感受吗？我在这里听你说。
+
+  harm_others: |
+    [安全提示] 伤害他人或自己都不是解决问题的方式。如果你正经历强烈的愤怒或伤害冲动，请立即寻求专业帮助：
+    - 全国心理援助热线：400-161-9995
+    - 或拨打 110 寻求紧急援助
+
+    愤怒和痛苦是可以被理解的，但暴力不能解决问题。
+
+  abuse_support: |
+    [支持提示] 感谢你愿意分享这些。任何形式的暴力都不应该被容忍。
+
+    你可以获得帮助：
+    - 全国妇女维权热线：12338
+    - 全国心理援助热线：400-161-9995
+    - 反家暴热线：16838198
+
+    你值得被安全、被尊重。你愿意告诉我更多吗？我会认真倾听。
+
+  psychiatric_referral: |
+    [健康提示] 你描述的情况可能需要专业的医疗评估。心理医生和精神科医生是受过专业训练的，他们可以帮助你。
+
+    建议：
+    - 联系当地三甲医院精神科/心理科
+    - 全国心理援助热线：400-161-9995
+    - 简单心理平台（线上预约专业咨询师）
+
+    这不是你的错，寻求帮助是勇敢的表现。
