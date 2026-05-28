@@ -1,0 +1,51 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_mode:
+        description: "部署模式"
+        required: true
+        type: choice
+        default: cloud
+        options:
+          - cloud
+          - local
+      skip_migrations:
+        description: "跳过数据库迁移"
+        type: boolean
+        default: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Deploy to server
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'DEPLOY'
+            cd /opt/mindwell
+            git pull origin main
+            echo "${{ secrets.ENV_FILE }}" > .env
+            chmod +x deploy.sh
+            ./deploy.sh ${{ github.event.inputs.deploy_mode }}
+          DEPLOY
+
+      - name: Health check
+        run: |
+          sleep 10
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://${{ secrets.SERVER_DOMAIN }}/health || echo "failed")
+          if [ "$STATUS" = "200" ]; then
+            echo "Deploy successful — health check 200"
+          else
+            echo "Health check returned $STATUS — verify manually"
+          fi

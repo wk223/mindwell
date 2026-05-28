@@ -1,18 +1,18 @@
+# Stage 1: Build
 FROM node:20-alpine AS builder
 
 WORKDIR /app
-
-COPY frontend/package.json frontend/package-lock.json ./
-RUN npm ci
-
-COPY frontend/ .
+COPY package.json package-lock.json ./
+# Use Aliyun npm mirror (China)
+RUN npm config set registry https://registry.npmmirror.com && npm ci
+COPY . .
 RUN npm run build
 
-FROM nginx:1.25-alpine
-
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+# Stage 2: Serve with nginx
+FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+EXPOSE 80 443
+ENTRYPOINT ["/docker-entrypoint.sh"]

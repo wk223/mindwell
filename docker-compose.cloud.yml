@@ -1,51 +1,162 @@
-version: "3.9"
+# ==============================================
+#  MindWell — 云服务器部署 (腾讯云 2C2G)
+#  使用云端 LLM API，不跑本地模型
+#
+#  启动: docker compose -f docker-compose.cloud.yml up -d
+#  停止: docker compose -f docker-compose.cloud.yml down
+# ==============================================
+name: mindwell
 
 services:
   postgres:
     image: postgres:16-alpine
+    restart: always
+    ports:
+      - "127.0.0.1:5432:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-mindwell}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mindwell_dev}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:-mindwell}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mindwell}"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
-    restart: unless-stopped
+    networks:
+      - mindwell
+    deploy:
+      resources:
+        limits:
+          memory: 256M
 
   redis:
     image: redis:7-alpine
+    restart: always
+    command: redis-server --maxmemory 64mb --maxmemory-policy allkeys-lru --save 900 1 --save 300 10
+    volumes:
+      - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
-    restart: unless-stopped
+    networks:
+      - mindwell
+    deploy:
+      resources:
+        limits:
+          memory: 96M
 
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
-    env_file: .env
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-mindwell}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-mindwell}
+      DATABASE_URL_SYNC: postgresql://${POSTGRES_USER:-mindwell}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-mindwell}
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ALGORITHM: HS256
+      JWT_EXPIRE_MINUTES: "1440"
+      # ---- 云端 LLM ----
+      LLM_API_KEY: ${LLM_API_KEY}
+      LLM_API_TYPE: ${LLM_API_TYPE:-openai}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.deepseek.com/v1}
+      LLM_MODEL: ${LLM_MODEL:-deepseek-chat}
+      LLM_MAX_TOKENS: ${LLM_MAX_TOKENS:-2048}
+      LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.7}
+      # ----
+      APP_ENV: production
+      APP_DEBUG: "false"
+      CORS_ORIGINS: ${CORS_ORIGINS:-["*"]}
+    command: >
+      sh -c "python -m app.db.init_db && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    networks:
+      - mindwell
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3).read()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
 
   frontend:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
-    ports:
-      - "80:80"
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: always
     depends_on:
       - backend
-    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./frontend/public/bgm.mp3:/usr/share/nginx/html/bgm.mp3:ro
+    networks:
+      - mindwell
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  # 数据库 Web 管理界面 → http://121.4.44.210:223
+  adminer:
+    image: adminer:latest
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - "223:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    networks:
+      - mindwell
+
+  # 定时备份数据库 (每天凌晨3点)
+  backup:
+    image: postgres:16-alpine
+    restart: always
+    depends_on:
+      - postgres
+    volumes:
+      - ./backups:/backups
+    environment:
+      PGHOST: postgres
+      PGUSER: ${POSTGRES_USER:-mindwell}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB:-mindwell}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          sleep 3600
+          HOUR=$$(date +%H)
+          if [ "$$HOUR" = "03" ]; then
+            FILE=/backups/mindwell_$$(date +%Y%m%d_%H%M%S).sql.gz
+            pg_dump -h postgres | gzip > $$FILE
+            echo "[$$(date)] Backup: $$FILE"
+            find /backups -name '*.sql.gz' -mtime +7 -delete
+          fi
+        done
+    networks:
+      - mindwell
 
 volumes:
   pgdata:
+  redis_data:
+
+networks:
+  mindwell:
+    driver: bridge

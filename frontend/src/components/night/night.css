@@ -1,0 +1,152 @@
+/* ── Night Mode Keyframes ── */
+
+@keyframes night-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes night-breathe {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; }
+}
+
+@keyframes night-glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.2), 0 8px 30px rgba(56, 189, 248, 0.15); }
+  50% { box-shadow: 0 0 35px rgba(56, 189, 248, 0.4), 0 12px 40px rgba(56, 189, 248, 0.25); }
+}
+
+@keyframes night-glow-wave {
+  0% { transform: translateX(-100%); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateX(200%); opacity: 0; }
+}
+
+@keyframes night-ripple {
+  0% { transform: scale(0); opacity: 0.6; }
+  100% { transform: scale(4); opacity: 0; }
+}
+
+@keyframes night-fade-in-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes night-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes night-type-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes night-page-blur-in {
+  0% { filter: blur(12px); opacity: 0; }
+  60% { filter: blur(0px); opacity: 1; }
+  100% { filter: blur(0px); opacity: 1; }
+}
+
+@keyframes night-particle-float {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-120px) translateX(20px); opacity: 0; }
+}
+
+@keyframes night-star-twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+@keyframes night-scan-line {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+
+@keyframes night-answer-reveal {
+  0% { opacity: 0; filter: blur(8px); transform: scale(0.96); }
+  100% { opacity: 1; filter: blur(0); transform: scale(1); }
+}
+
+/* ── Utility Classes ── */
+
+.animate-night-float {
+  animation: night-float 4s ease-in-out infinite;
+}
+
+.animate-night-breathe {
+  animation: night-breathe 3s ease-in-out infinite;
+}
+
+.animate-night-glow-pulse {
+  animation: night-glow-pulse 2.5s ease-in-out infinite;
+}
+
+.animate-night-fade-in-up {
+  animation: night-fade-in-up 0.6s ease-out forwards;
+}
+
+.animate-night-fade-in {
+  animation: night-fade-in 0.8s ease-out forwards;
+}
+
+.animate-night-type-in {
+  animation: night-type-in 0.05s ease-out forwards;
+}
+
+.animate-night-page-blur-in {
+  animation: night-page-blur-in 1s ease-out forwards;
+}
+
+.animate-night-ripple {
+  animation: night-ripple 0.6s ease-out forwards;
+}
+
+.animate-night-star-twinkle {
+  animation: night-star-twinkle 3s ease-in-out infinite;
+}
+
+/* ── Particle Canvas ── */
+.night-particles {
+  pointer-events: none;
+}
+
+/* ── Glass elements ── */
+.night-glass {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+.night-glass-input {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(51, 65, 85, 0.4);
+  transition: all 0.4s ease;
+}
+
+.night-glass-input:focus-within {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: rgba(56, 189, 248, 0.3);
+  box-shadow: 0 0 40px rgba(56, 189, 248, 0.06);
+}
+
+/* ── Echo answer card ── */
+.night-echo-answer {
+  animation: night-answer-reveal 1.2s ease-out forwards;
+}
+
+/* ── Style selector dots ── */
+.night-style-dot {
+  transition: all 0.4s ease;
+}
+.night-style-dot:hover {
+  transform: scale(1.15);
+}
+.night-style-dot.active {
+  box-shadow: 0 0 16px currentColor;
+}

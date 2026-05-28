@@ -1,0 +1,123 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mindwell}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-mindwell}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mindwell}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mindwell
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mindwell
+
+  ollama:
+    image: ollama/ollama:latest
+    restart: always
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_KEEP_ALIVE=24h
+    # GPU support — uncomment if you have NVIDIA GPU:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    networks:
+      - mindwell
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Auto-pull model on first start
+  ollama-init:
+    image: ollama/ollama:latest
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "Pulling model ${LLM_MODEL:-qwen2.5:7b}..."
+        ollama pull ${LLM_MODEL:-qwen2.5:7b}
+        echo "Model ready."
+    environment:
+      - OLLAMA_HOST=ollama:11434
+    networks:
+      - mindwell
+
+  backend:
+    build: ./backend
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ollama-init:
+        condition: service_completed_successfully
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-mindwell}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-mindwell}
+      - DATABASE_URL_SYNC=postgresql://${POSTGRES_USER:-mindwell}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-mindwell}
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_SECRET=${JWT_SECRET}
+      - LLM_API_KEY=ollama
+      - LLM_BASE_URL=http://ollama:11434/v1
+      - LLM_MODEL=${LLM_MODEL:-qwen2.5:7b}
+      - LLM_MAX_TOKENS=1024
+      - LLM_TEMPERATURE=0.7
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - CORS_ORIGINS=["*"]
+    networks:
+      - mindwell
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3).read()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  frontend:
+    build: ./frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - mindwell
+
+volumes:
+  pgdata:
+  redis_data:
+  ollama_data:
+
+networks:
+  mindwell:
+    driver: bridge

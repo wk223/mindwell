@@ -1,0 +1,284 @@
+/* ===== CSS Custom Properties ===== */
+:root {
+  /* Page background */
+  --bg-page: #fbf8f4;
+  --bg-page-end: #f0ecf5;
+
+  /* Card surfaces */
+  --bg-card: rgba(255, 255, 255, 0.7);
+  --bg-card-hover: rgba(255, 255, 255, 0.85);
+  --bg-input: #f8f5f0;
+  --bg-glass: rgba(255, 255, 255, 0.6);
+
+  /* Accent — defaults to mint (calm/neutral) */
+  --accent-50: #f2faf6;
+  --accent-100: #e0f5e8;
+  --accent-200: #b8e8cf;
+  --accent-300: #8cd8b0;
+  --accent-400: #5dc48d;
+  --accent-500: #3dab70;
+  --accent-600: #2d8f5a;
+
+  /* Text */
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+
+  /* Border */
+  --border-light: rgba(229, 223, 211, 0.6);
+  --border-medium: rgba(229, 223, 211, 0.4);
+
+  /* Shadows */
+  --shadow-soft: 0 2px 16px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.05);
+  --shadow-glow: 0 0 20px rgba(141, 200, 176, 0.3);
+  --shadow-glow-strong: 0 0 35px rgba(141, 200, 176, 0.15);
+
+  /* Radius */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+}
+
+/* ===== Mood-driven theme overrides ===== */
+.mood-happy {
+  --accent-400: #facc15;
+  --accent-500: #eab308;
+  --accent-600: #ca8a04;
+  --shadow-glow: 0 0 20px rgba(250, 204, 21, 0.3);
+  --shadow-glow-strong: 0 0 35px rgba(250, 204, 21, 0.15);
+}
+
+.mood-calm {
+  --accent-400: #5dc48d;
+  --accent-500: #3dab70;
+  --accent-600: #2d8f5a;
+  --shadow-glow: 0 0 20px rgba(141, 200, 176, 0.3);
+  --shadow-glow-strong: 0 0 35px rgba(141, 200, 176, 0.15);
+}
+
+.mood-sad {
+  --accent-400: #8f7ac3;
+  --accent-500: #765fb2;
+  --accent-600: #644e9e;
+  --shadow-glow: 0 0 20px rgba(143, 122, 195, 0.25);
+  --shadow-glow-strong: 0 0 35px rgba(143, 122, 195, 0.12);
+}
+
+.mood-neutral {
+  --accent-400: #5dc48d;
+  --accent-500: #3dab70;
+  --accent-600: #2d8f5a;
+  --shadow-glow: 0 0 20px rgba(141, 200, 176, 0.3);
+  --shadow-glow-strong: 0 0 35px rgba(141, 200, 176, 0.15);
+}
+
+/* ===== Keyframe Animations ===== */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes float-delayed {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(141, 200, 176, 0.2); }
+  50% { box-shadow: 0 0 40px rgba(141, 200, 176, 0.4); }
+}
+
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(20px, -15px) scale(1.02); }
+  50% { transform: translate(-10px, 10px) scale(0.98); }
+  75% { transform: translate(-25px, -5px) scale(1.01); }
+}
+
+/* ===== Hero moon (CSS-only crescent) ===== */
+.hero-moon {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fde68a 0%, #fbbf24 40%, #f59e0b 100%);
+  box-shadow:
+    0 0 60px rgba(251, 191, 36, 0.25),
+    0 0 120px rgba(251, 191, 36, 0.08);
+  position: relative;
+}
+.hero-moon::after {
+  content: '';
+  position: absolute;
+  top: 5%;
+  right: 12%;
+  width: 35%;
+  height: 35%;
+  border-radius: 50%;
+  background: var(--bg-page, #fefcf8);
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.03);
+}
+
+/* ===== Paper texture for journal/memo feel ===== */
+.paper-texture {
+  background-color: #fefdfb;
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 100% 28px;
+}
+
+/* ===== Card hierarchy ===== */
+.card-primary {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-xl, 24px);
+  padding: 28px;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.4s ease, transform 0.3s ease;
+}
+.card-primary:hover {
+  box-shadow: 0 4px 30px rgba(141, 200, 176, 0.12);
+  transform: translateY(-1px);
+}
+
+.card-secondary {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: var(--radius-lg, 20px);
+  padding: 18px 20px;
+  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.03);
+  transition: box-shadow 0.3s ease;
+}
+.card-secondary:hover {
+  box-shadow: 0 3px 20px rgba(0, 0, 0, 0.05);
+}
+
+.card-tertiary {
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-md, 16px);
+  padding: 12px 16px;
+}
+
+/* ===== Ambient dots ===== */
+.ambient-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent-300, #8cd8b0);
+  opacity: 0.35;
+  position: absolute;
+}
+
+/* ===== Underline input (journal style) ===== */
+.input-underline {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid var(--border-light, rgba(229, 223, 211, 0.8));
+  padding: 8px 4px;
+  font-size: 15px;
+  color: var(--text-primary, #1f2937);
+  transition: border-color 0.3s ease;
+  outline: none;
+}
+.input-underline:focus {
+  border-bottom-color: var(--accent-400, #5dc48d);
+  border-bottom-width: 2px;
+}
+.input-underline::placeholder {
+  color: var(--text-tertiary, #9ca3af);
+}
+
+/* ===== River timeline ===== */
+.river-timeline {
+  position: relative;
+  padding: 0;
+}
+.river-timeline::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1.5px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--accent-300, #8cd8b0) 10%,
+    var(--accent-300, #8cd8b0) 90%,
+    transparent 100%
+  );
+  opacity: 0.5;
+}
+.river-entry {
+  position: relative;
+  width: 50%;
+  padding: 12px 24px;
+}
+.river-entry.left {
+  left: 0;
+  padding-right: 32px;
+}
+.river-entry.right {
+  left: 50%;
+  padding-left: 32px;
+}
+.river-node {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent-400, #5dc48d);
+  border: 2px solid white;
+  box-shadow: 0 0 8px rgba(141, 200, 176, 0.4);
+  transform: translateY(-50%);
+}
+.river-entry.left .river-node {
+  right: -5px;
+}
+.river-entry.right .river-node {
+  left: -5px;
+}
+
+/* ===== Suggestion chips ===== */
+.suggestion-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--border-light, rgba(229, 223, 211, 0.6));
+  color: var(--text-secondary, #6b7280);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  opacity: 0;
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+.suggestion-chip:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: var(--accent-300, #8cd8b0);
+  color: var(--text-primary, #1f2937);
+}
