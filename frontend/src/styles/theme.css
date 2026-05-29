@@ -8,32 +8,32 @@
 /* ===== Layer 1 — 日间 Token (default) ===== */
 :root {
   /* ── Page background ── */
-  --bg-deep: #f8fafc;
-  --bg-mid: #f1f5f9;
-  --bg-surface: rgba(255, 255, 255, 0.55);
-  --bg-page: #f8fafc;
-  --bg-page-end: #e8f5e9;
+  --bg-deep: #eaf5ed;
+  --bg-mid: #dceee1;
+  --bg-surface: rgba(220, 238, 225, 0.55);
+  --bg-page: #eaf5ed;
+  --bg-page-end: #d0e8d5;
 
   /* ── Card surfaces ── */
-  --bg-card: rgba(255, 255, 255, 0.55);
-  --bg-card-hover: rgba(255, 255, 255, 0.75);
-  --bg-input: rgba(248, 250, 252, 0.7);
-  --bg-glass: rgba(255, 255, 255, 0.5);
+  --bg-card: rgba(220, 238, 225, 0.6);
+  --bg-card-hover: rgba(200, 228, 208, 0.75);
+  --bg-input: rgba(210, 235, 218, 0.65);
+  --bg-glass: rgba(200, 228, 208, 0.45);
 
   /* ── Text ── */
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --text-tertiary: #94a3b8;
+  --text-primary: #1a2e1f;
+  --text-secondary: #4a6b52;
+  --text-tertiary: #7a9a80;
   --text-inverse: #e2e8f0;
 
-  /* ── Accent — day mint/green ── */
-  --accent-50: #f0fdf4;
-  --accent-100: #dcfce7;
-  --accent-200: #bbf7d0;
-  --accent-300: #86efac;
-  --accent-400: #4ade80;
-  --accent-500: #22c55e;
-  --accent-600: #16a34a;
+  /* ── Accent — day warm green ── */
+  --accent-50: #e8f5e9;
+  --accent-100: #c8e6c9;
+  --accent-200: #a5d6a7;
+  --accent-300: #81c784;
+  --accent-400: #66bb6a;
+  --accent-500: #43a047;
+  --accent-600: #2e7d32;
 
   /* ── Border ── */
   --border-light: rgba(226, 232, 240, 0.6);
