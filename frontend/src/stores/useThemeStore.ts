@@ -39,6 +39,8 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
     localStorage.setItem(LS_KEY, next);
     applyClass(next);
     set({ mode: next, isManualOverride: true });
+    // 强制刷新确保所有 var() 和 color-mix() 重新计算
+    setTimeout(() => window.location.reload(), 100);
   },
 
   resetToAuto: () => {

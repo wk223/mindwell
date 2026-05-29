@@ -1,0 +1,24 @@
+project_name: "MindWell (观心 / ECHO)"
+project_type: "web-app"
+project_level: 3
+last_updated: "2025-07-16"
+phase_1_analysis:
+  product_brief: ""  # User provided detailed 16-point modification list — counts as brief
+phase_2_planning:
+  prd: "docs/bmad-prd.md"
+  tech_spec: ""
+  decisions: "pending (D1-D6)"
+  d1_scene_tech: ""
+  d2_daynight_toggle: ""
+  d3_scene_analytics: ""
+  d4_mood_map: ""
+  d5_mvp_scenes: ""
+  d6_ios_blur: ""
+  tech_spec: ""
+phase_3_solutioning:
+  architecture: ""
+  gate_check_passed: false
+phase_4_implementation:
+  sprints_planned: 0
+  stories_created: 0
+  stories_completed: 0

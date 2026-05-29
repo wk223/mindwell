@@ -44,8 +44,7 @@
   }
 
   /* ── 深夜模式背景覆盖 ── */
-  .night-theme body,
-  body:has(.night-theme) {
+  html.night-theme body {
     background:
       /* 顶部月光冷紫 orb */
       radial-gradient(ellipse 80% 50% at 50% -10%, rgba(139, 92, 246, 0.08) 0%, transparent 60%),
