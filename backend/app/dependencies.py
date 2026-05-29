@@ -23,6 +23,7 @@ async def get_current_user(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found or inactive")
 
     # ── PostgreSQL Row-Level Security context ──
-    await db.execute(text("SET app.current_user_id = :uid"), {"uid": str(user.id)})
+    # PostgreSQL SET 不支持参数绑定，UUID 来自数据库安全
+    await db.execute(text(f"SET app.current_user_id = '{str(user.id)}'"))
 
     return user
