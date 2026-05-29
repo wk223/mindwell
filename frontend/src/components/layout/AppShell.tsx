@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { useAuthStore } from "../../stores/useAuthStore";
 import { useLayoutStore } from "../../stores/useLayoutStore";
+import { useDayNight } from "../../hooks/useDayNight";
+import { useMoodTheme } from "../../hooks/useMoodTheme";
 import Sidebar from "./Sidebar";
 import RightPanel from "./RightPanel";
 import MobileShell from "./MobileShell";
@@ -12,6 +14,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const logout = useAuthStore((s) => s.logout);
   const isMobile = useLayoutStore((s) => s.isMobile);
   const setMobile = useLayoutStore((s) => s.setMobile);
+  useDayNight();   // 驱动日夜主题 CSS class 切换（.night-theme）
+  useMoodTheme(); // 驱动情绪反馈 CSS class 切换（.mood-happy/.mood-sad/.mood-calm/.mood-neutral）
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 1023px)");

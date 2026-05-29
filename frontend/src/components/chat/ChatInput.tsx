@@ -37,13 +37,18 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
 
   return (
     <div className="sticky bottom-0 z-20 pb-4 px-4">
-      {/* Glow halo behind the input bar */}
-      <div className="absolute inset-x-8 -bottom-2 h-20 bg-moon-400/5 blur-3xl rounded-full" />
+      {/* Glow halo — 使用 CSS token */}
+      <div
+        className="absolute inset-x-8 -bottom-2 h-20 blur-3xl rounded-full pointer-events-none"
+        style={{
+          background: "color-mix(in srgb, var(--accent-400) 4%, transparent)",
+        }}
+      />
 
       <div className="max-w-3xl mx-auto">
         <div
-          className="flex gap-3 items-end p-3 rounded-2xl border border-white/[0.07] bg-white/[0.03]"
-          style={{ backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}
+          className="flex gap-3 items-end p-3 glass-heavy rounded-2xl"
+          style={{ backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }}
         >
           <textarea
             ref={textareaRef}
@@ -53,10 +58,10 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
             placeholder="说说你的感受..."
             rows={1}
             disabled={disabled}
-            className="flex-1 resize-none bg-transparent px-2 py-1 text-sm text-slate-200
-                       placeholder:text-slate-600 focus:outline-none
-                       disabled:opacity-40 disabled:cursor-not-allowed
+            className="flex-1 resize-none bg-transparent px-2 py-1 text-sm
+                       focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed
                        max-h-[150px]"
+            style={{ color: "var(--text-primary)" }}
           />
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -64,13 +69,22 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
             onClick={handleSend}
             disabled={disabled || !input.trim()}
             className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center
-                       bg-white/[0.06] border border-white/[0.08] text-slate-400
-                       hover:bg-white/[0.1] hover:text-slate-200 hover:border-white/[0.12]
-                       disabled:opacity-20 disabled:cursor-not-allowed
-                       transition-all duration-300 relative overflow-hidden"
+                       transition-all duration-300 relative overflow-hidden
+                       disabled:opacity-20 disabled:cursor-not-allowed"
+            style={{
+              background: "var(--bg-glass)",
+              border: "0.5px solid var(--card-border)",
+              color: "var(--text-secondary)",
+            }}
           >
-            {/* Inner glow on send button */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-moon-400/0 to-moon-400/10 opacity-0 hover:opacity-100 transition-opacity duration-500" />
+            {/* Inner glow on hover */}
+            <div
+              className="absolute inset-0 opacity-0 transition-opacity duration-500"
+              style={{
+                background: "linear-gradient(135deg, var(--accent-400) 0%, transparent 60%)",
+                opacity: 0,
+              }}
+            />
             <svg className="w-5 h-5 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -81,7 +95,7 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
             </svg>
           </motion.button>
         </div>
-        <p className="text-[11px] text-slate-600 text-center mt-2.5 tracking-wide">
+        <p className="text-[11px] text-center mt-2.5 tracking-wide" style={{ color: "var(--text-tertiary)" }}>
           MindWell 不替代专业医疗诊断
         </p>
       </div>

@@ -1,227 +1,379 @@
-import { useState } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { apiRequest } from "../api/client";
+import { pickAnswer } from "../components/night/echoAnswers";
 
 const easeOut = [0.25, 0.1, 0.25, 1] as const;
 
-const modes = [
-  { key: "gentle", label: "温柔", emoji: "🕊️" },
-  { key: "clear", label: "清醒", emoji: "💎" },
-  { key: "philosophy", label: "哲学", emoji: "🪐" },
-  { key: "late", label: "深夜", emoji: "🌙" },
-  { key: "hope", label: "希望", emoji: "✨" },
+const PLACEHOLDERS = ["关于他", "关于未来", "关于遗憾", "关于自己", "关于孤独", "关于成长"];
+
+const STYLES = [
+  { id: "gentle", label: "温柔", color: "#f9a8d4" },
+  { id: "sober", label: "清醒", color: "#94a3b8" },
+  { id: "philosophy", label: "哲学", color: "#a78bfa" },
+  { id: "late_night", label: "深夜", color: "#7dd3fc" },
+  { id: "hope", label: "希望", color: "#fbbf24" },
 ];
+
+type EchoResult = { answer: string; whisper: string; tags: string[] } | null;
 
 export default function EchoPage() {
   const [question, setQuestion] = useState("");
-  const [mode, setMode] = useState("gentle");
-  const [answer, setAnswer] = useState<string | null>(null);
-  const [isRevealing, setIsRevealing] = useState(false);
+  const [style, setStyle] = useState("late_night");
+  const [result, setResult] = useState<EchoResult>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [placeholderIdx, setPlaceholderIdx] = useState(0);
+  const [revealState, setRevealState] = useState<"idle" | "dimming" | "revealing" | "done">("idle");
+  const [visibleChars, setVisibleChars] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleAsk = () => {
-    if (!question.trim()) return;
-    setIsRevealing(true);
-    setAnswer(null);
+  // Rotate placeholder
+  useEffect(() => {
+    const id = setInterval(() => {
+      setPlaceholderIdx((i) => (i + 1) % PLACEHOLDERS.length);
+    }, 3000);
+    return () => clearInterval(id);
+  }, []);
 
-    // Simulate answer reveal
-    setTimeout(() => {
-      const answers = [
-        "跟随你内心的声音，它知道方向。",
-        "答案早已在你心中，你只是需要勇气去确认。",
-        "风会带走疑问，留下的只有你真实的选择。",
-        "不必急于知道一切，有些路需要慢慢走。",
-        "宇宙没有巧合，每一次相遇都是回应。",
-      ];
-      setAnswer(answers[Math.floor(Math.random() * answers.length)]);
-    }, 1200);
+  // 逐字显示
+  useEffect(() => {
+    if (revealState !== "revealing" || !result) return;
+    const text = result.answer;
+    if (visibleChars >= text.length) {
+      setRevealState("done");
+      return;
+    }
+    const timer = setTimeout(() => {
+      setVisibleChars((n) => Math.min(n + 1, text.length));
+    }, 60 + Math.random() * 40); // 微随机速度
+    return () => clearTimeout(timer);
+  }, [revealState, visibleChars, result]);
+
+  const handleSubmit = useCallback(async () => {
+    if (!question.trim() || loading) return;
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    setRevealState("idle");
+    setVisibleChars(0);
+
+    const API_TIMEOUT = 30000;
+
+    const apiCall = apiRequest<{
+      answer: string;
+      whisper: string;
+      tags: string[];
+    }>("/night/echo", {
+      method: "POST",
+      body: JSON.stringify({ question: question.trim(), style }),
+    });
+
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("timeout")), API_TIMEOUT)
+    );
+
+    const localFallback = async () => {
+      await new Promise((r) => setTimeout(r, 600 + Math.random() * 800));
+      const local = pickAnswer(style);
+      return { answer: local.answer, whisper: local.whisper, tags: local.tags };
+    };
+
+    try {
+      const data = await Promise.race([apiCall, timeout]);
+      setResult(data);
+    } catch {
+      const data = await localFallback();
+      setResult(data);
+    } finally {
+      setLoading(false);
+      // 启动意识浮现序列
+      setTimeout(() => setRevealState("dimming"), 200);
+      setTimeout(() => setRevealState("revealing"), 600);
+    }
+  }, [question, style, loading]);
+
+  const reset = () => {
+    setResult(null);
+    setQuestion("");
+    setError(null);
+    setRevealState("idle");
+    setVisibleChars(0);
+    inputRef.current?.focus();
   };
 
+  const activeStyle = STYLES.find((s) => s.id === style) || STYLES[3];
+
   return (
-    <div
-      className="min-h-full flex flex-col items-center justify-center px-6 py-16 relative"
-      style={{
-        background: "linear-gradient(180deg, #020617 0%, #071426 40%, #0F172A 70%, #1E293B 100%)",
-      }}
-    >
-      {/* Background stars */}
+    <div className="min-h-full flex flex-col items-center justify-center px-6 py-16 relative overflow-hidden">
+      {/* ═══════════════════════════════════════════
+          背景 — 深夜宇宙
+          ═══════════════════════════════════════════ */}
+      {/* 深空底色 */}
+      <div
+        className="absolute inset-0 transition-[background] duration-[1.8s]"
+        style={{ background: "var(--bg-deep)" }}
+      />
+
+      {/* 星空 dots (CSS-only) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        {Array.from({ length: 30 }).map((_, i) => (
+        {Array.from({ length: 40 }).map((_, i) => {
+          const size = Math.random() * 2.5 + 0.5;
+          return (
+            <div
+              key={i}
+              className="star-dot absolute"
+              style={{
+                width: size,
+                height: size,
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 5}s`,
+                animationDuration: `${3 + Math.random() * 4}s`,
+              }}
+            />
+          );
+        })}
+        {/* 大星点 */}
+        {Array.from({ length: 6 }).map((_, i) => (
           <div
-            key={i}
-            className="absolute rounded-full bg-white animate-twinkle"
+            key={`lg-${i}`}
+            className="star-dot-lg absolute"
             style={{
-              width: `${Math.random() * 2 + 0.5}px`,
-              height: `${Math.random() * 2 + 0.5}px`,
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              opacity: Math.random() * 0.5 + 0.1,
+              top: `${10 + Math.random() * 80}%`,
+              left: `${10 + Math.random() * 80}%`,
+              animationDelay: `${Math.random() * 6}s`,
+              animationDuration: `${5 + Math.random() * 4}s`,
             }}
           />
         ))}
       </div>
 
-      {/* Floating orbs */}
-      <div
-        className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full opacity-[0.03]"
-        style={{ background: "radial-gradient(circle, rgba(200,180,220,1) 0%, transparent 70%)" }}
-      />
-      <div
-        className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full opacity-[0.02]"
-        style={{ background: "radial-gradient(circle, rgba(201,141,50,1) 0%, transparent 70%)" }}
-      />
+      {/* 深空光球 */}
+      <div className="deep-space-orb deep-space-orb-moon absolute -top-[15%] right-[10%] w-[50%] h-[50%]" />
+      <div className="deep-space-orb deep-space-orb-warm absolute -bottom-[10%] left-[5%] w-[45%] h-[45%]" />
 
+      {/* ── 主内容 ── */}
       <div className="relative z-10 w-full max-w-2xl">
-        {/* Header */}
+        {/* 标题 */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: easeOut }}
-          className="text-center mb-12"
+          className="text-center mb-10"
         >
+          {/* CSS 月亮装饰 */}
           <motion.div
             animate={{ opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="text-5xl mb-5"
+            className="mx-auto mb-5 w-14 h-14 rounded-full relative"
+            style={{
+              background: "var(--bg-glass)",
+              border: "0.5px solid var(--card-border)",
+              boxShadow: "0 0 40px -8px var(--breathing-color)",
+            }}
           >
-            📖
+            {/* 书页符号 */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-4 h-0.5 rounded-full" style={{ background: "var(--accent-400)", opacity: 0.5 }} />
+              <div className="absolute w-0.5 h-4 rounded-full" style={{ background: "var(--accent-400)", opacity: 0.5 }} />
+            </div>
           </motion.div>
-          <h1 className="font-serif text-3xl font-semibold text-slate-100 tracking-tight">
+          <h1 className="font-serif text-3xl font-semibold tracking-tight" style={{ color: "var(--text-primary)" }}>
             ECHO 答案之书
           </h1>
-          <p className="text-slate-500 mt-3 text-sm leading-relaxed max-w-sm mx-auto">
+          <p className="mt-3 text-sm leading-relaxed max-w-sm mx-auto" style={{ color: "var(--text-secondary)" }}>
             在心里默念你的问题，然后翻开这一页
           </p>
         </motion.div>
 
-        {/* Question input */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.7, ease: easeOut }}
-          className="mb-8"
-        >
-          <div
-            className="relative rounded-3xl p-8 border border-white/[0.08] bg-white/[0.03]"
-            style={{ backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)" }}
-          >
-            {/* Glow edge */}
-            <div className="absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/[0.04] pointer-events-none" />
-            <div
-              className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-gradient-to-r from-transparent via-moon-400/20 to-transparent"
-            />
-
-            <textarea
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              placeholder="写下你想问的问题..."
-              rows={3}
-              className="w-full resize-none bg-transparent text-center text-lg text-slate-200
-                         placeholder:text-slate-600 focus:outline-none
-                         leading-relaxed"
-            />
-
-            {/* Mode buttons */}
-            <div className="flex justify-center gap-3 mt-6 flex-wrap">
-              {modes.map((m) => (
-                <motion.button
-                  key={m.key}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setMode(m.key)}
-                  className="relative px-4 py-2 rounded-full text-sm transition-all duration-300"
-                  style={
-                    mode === m.key
-                      ? {
-                          background: "rgba(255,255,255,0.08)",
-                          color: "#e2e8f0",
-                          boxShadow: "0 0 24px -8px rgba(200,180,220,0.3)",
-                        }
-                      : {
-                          background: "transparent",
-                          color: "#64748b",
-                        }
-                  }
-                >
-                  {mode === m.key && (
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-lavender-400/10 to-moon-400/10" />
-                  )}
-                  <span className="relative z-10 flex items-center gap-1.5">
-                    <span>{m.emoji}</span>
-                    <span>{m.label}</span>
-                  </span>
-                </motion.button>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* CTA Button */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.6 }}
-          className="text-center mb-10"
-        >
-          <motion.button
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleAsk}
-            disabled={!question.trim() || isRevealing}
-            className="btn-glow text-base px-12 py-4 text-lg disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            {isRevealing ? "..." : "翻开这一页"}
-          </motion.button>
-        </motion.div>
-
-        {/* Answer reveal */}
-        <AnimatePresence>
-          {isRevealing && (
+        {/* 问题输入 — 超大玻璃拟态 */}
+        <AnimatePresence mode="wait">
+          {!result ? (
             <motion.div
+              key="input"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.7, ease: easeOut }}
+            >
+              <div className="glass-heavy rounded-3xl px-8 py-7 mb-6 relative overflow-hidden">
+                {/* 顶部微光 */}
+                <div
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px"
+                  style={{
+                    background: "linear-gradient(90deg, transparent, var(--accent-400), transparent)",
+                    opacity: 0.2,
+                  }}
+                />
+
+                <input
+                  ref={inputRef}
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                  placeholder={PLACEHOLDERS[placeholderIdx]}
+                  maxLength={200}
+                  className="w-full bg-transparent text-center text-xl sm:text-2xl
+                             placeholder:opacity-30 focus:outline-none
+                             transition-all duration-500"
+                  style={{
+                    color: "var(--text-primary)",
+                    letterSpacing: "0.05em",
+                  }}
+                />
+
+                {/* 风格选择器 — 月光胶囊 */}
+                <div className="flex justify-center gap-2 sm:gap-3 mt-6 flex-wrap">
+                  {STYLES.map((s) => (
+                    <motion.button
+                      key={s.id}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setStyle(s.id)}
+                      className="relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-300"
+                      style={{
+                        color: style === s.id ? s.color : "var(--text-tertiary)",
+                        background: style === s.id
+                          ? `${s.color}12`
+                          : "var(--bg-glass)",
+                        border: style === s.id
+                          ? `1px solid ${s.color}30`
+                          : "0.5px solid var(--border-light)",
+                        boxShadow: style === s.id
+                          ? `0 0 20px -6px ${s.color}20`
+                          : "none",
+                      }}
+                    >
+                      {/* CSS dot indicator */}
+                      <span
+                        className="inline-block w-1.5 h-1.5 rounded-full mr-1.5 align-middle"
+                        style={{ background: s.color, opacity: style === s.id ? 1 : 0.4 }}
+                      />
+                      {s.label}
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+
+              {error && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center text-sm mb-4"
+                  style={{ color: "var(--text-tertiary)" }}
+                >
+                  {error}
+                </motion.p>
+              )}
+
+              {/* CTA 按钮 */}
+              <div className="text-center mb-10">
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={handleSubmit}
+                  disabled={!question.trim() || loading}
+                  className="btn-luminous text-base px-12 py-4 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  {loading ? "倾听中..." : "翻开这一页"}
+                </motion.button>
+              </div>
+            </motion.div>
+          ) : (
+            /* ═══════════════════════════════════════════
+               答案展示 — 意识浮现
+               ═══════════════════════════════════════════ */
+            <motion.div
+              key="answer"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="text-center"
             >
-              {/* Darkening overlay effect via a subtle backdrop */}
-              {!answer ? (
+              {/* 暗淡过渡 */}
+              {revealState === "dimming" && (
                 <motion.div
                   animate={{ opacity: [0.3, 0.6, 0.3] }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className="text-4xl"
-                >
-                  🌌
-                </motion.div>
-              ) : (
+                  className="w-12 h-12 mx-auto rounded-full"
+                  style={{
+                    background: "var(--bg-glass)",
+                    border: "0.5px solid var(--card-border)",
+                    boxShadow: "0 0 30px -10px var(--breathing-color)",
+                  }}
+                />
+              )}
+
+              {/* 答案浮现 */}
+              {(revealState === "revealing" || revealState === "done") && result && (
                 <motion.div
-                  initial={{ opacity: 0, y: 16, filter: "blur(8px)" }}
-                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  initial={{ opacity: 0, filter: "blur(16px)", transform: "translateY(12px) scale(0.96)" }}
+                  animate={{ opacity: 1, filter: "blur(0)", transform: "translateY(0) scale(1)" }}
                   transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                  className="glass-heavy rounded-3xl p-10 card-texture max-w-xl mx-auto"
+                  className="glass-heavy rounded-3xl px-10 py-10 max-w-xl mx-auto relative overflow-hidden"
                 >
-                  {/* Glow pulse on reveal */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: [0, 0.5, 0] }}
-                    transition={{ duration: 2, ease: "easeOut" }}
-                    className="absolute inset-0 rounded-3xl bg-lavender-400/5 pointer-events-none"
-                  />
+                  {/* 光晕扩散 */}
+                  <div className="glow-expand-ring" />
+
+                  {/* 主答案 — 逐字显示 */}
+                  <p
+                    className="font-serif text-xl sm:text-2xl leading-relaxed tracking-wider italic relative z-10"
+                    style={{ color: "var(--text-primary)", letterSpacing: "0.04em" }}
+                  >
+                    "
+                    {result.answer.split("").map((char, i) => (
+                      <span
+                        key={i}
+                        className="reveal-char"
+                        style={{ animationDelay: `${i * 0.05}s` }}
+                      >
+                        {char}
+                      </span>
+                    ))}
+                    "
+                  </p>
+
+                  {/* Whisper */}
                   <motion.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 0.6, duration: 1 }}
-                    className="font-serif text-xl text-slate-200 leading-relaxed italic"
+                    transition={{ delay: 1.2, duration: 0.8 }}
+                    className="mt-5 text-sm italic leading-relaxed tracking-wide relative z-10"
+                    style={{ color: "var(--text-secondary)" }}
                   >
-                    "{answer}"
+                    {result.whisper}
                   </motion.p>
+
+                  {/* Tags */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1.8, duration: 0.6 }}
+                    className="flex flex-wrap justify-center gap-2 mt-5 relative z-10"
+                  >
+                    {result.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-3 py-1 rounded-full text-[11px] tracking-wider"
+                        style={{
+                          background: "var(--bg-glass)",
+                          border: "0.5px solid var(--border-light)",
+                          color: "var(--text-secondary)",
+                        }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </motion.div>
+
+                  {/* 再问一次 */}
                   <motion.button
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 1.5, duration: 0.6 }}
-                    onClick={() => {
-                      setIsRevealing(false);
-                      setAnswer(null);
-                      setQuestion("");
-                    }}
-                    className="mt-6 text-xs text-slate-600 hover:text-slate-400 transition-colors"
+                    transition={{ delay: 2.2, duration: 0.6 }}
+                    onClick={reset}
+                    className="mt-8 text-xs transition-colors relative z-10"
+                    style={{ color: "var(--text-tertiary)" }}
                   >
                     再问一次
                   </motion.button>

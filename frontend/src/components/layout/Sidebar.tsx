@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../../utils/cn";
 import { useDialogueStore } from "../../stores/useDialogueStore";
+import MoonIcon from "../shared/MoonIcon";
 
 const easeOut = [0.25, 0.1, 0.25, 1] as const;
 
@@ -12,18 +13,16 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { to: "/home", label: "首页", icon: HomeIcon },
-  { to: "/chat", label: "倾诉", icon: ChatIcon },
-  { to: "/echo", label: "ECHO · 答案之书", icon: EchoIcon },
-  { to: "/mood", label: "情绪日记", icon: MoodIcon },
-  { to: "/assessment", label: "心理测评", icon: AssessmentIcon },
-  { to: "/night", label: "深夜小智", icon: NightIcon },
+  { to: "/home", label: "首页" },
+  { to: "/chat", label: "倾诉" },
+  { to: "/echo", label: "答案之书" },
+  { to: "/mood", label: "情绪日记" },
+  { to: "/assessment", label: "自我了解" },
+  { to: "/night", label: "深夜陪伴" },
 ];
 
 const stagger = {
-  animate: {
-    transition: { staggerChildren: 0.06 },
-  },
+  animate: { transition: { staggerChildren: 0.06 } },
 };
 
 const itemAnim = {
@@ -52,57 +51,74 @@ export default function Sidebar({ userNickname, onLogout }: SidebarProps) {
       transition={{ duration: 0.8, ease: easeOut }}
       className="w-[240px] shrink-0 flex flex-col h-full relative overflow-hidden"
     >
-      {/* Deep space gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-void-900/95 via-void-850/90 to-void-800/85" />
-
-      {/* Subtle starlight dots (CSS-only) */}
+      {/* 背景 — 使用 CSS 变量跟随日夜切换 */}
       <div
-        className="absolute inset-0 opacity-20"
+        className="absolute inset-0 transition-[background] duration-[1.8s]"
         style={{
-          backgroundImage:
-            "radial-gradient(1px 1px at 20% 10%, rgba(255,255,255,0.6), transparent), " +
-            "radial-gradient(1px 1px at 65% 25%, rgba(255,255,255,0.4), transparent), " +
-            "radial-gradient(1.5px 1.5px at 40% 55%, rgba(255,255,255,0.5), transparent), " +
-            "radial-gradient(1px 1px at 80% 40%, rgba(255,255,255,0.3), transparent), " +
-            "radial-gradient(1px 1px at 15% 70%, rgba(255,255,255,0.4), transparent), " +
-            "radial-gradient(1.5px 1.5px at 55% 80%, rgba(255,255,255,0.35), transparent)",
-          backgroundSize: "100% 100%",
-          backgroundRepeat: "no-repeat",
+          background: "linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-mid) 100%)",
         }}
       />
 
-      {/* Floating light orb */}
+      {/* 星光 dots (CSS-only) */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none" aria-hidden="true">
+        {[
+          { top: "8%", left: "20%" }, { top: "22%", left: "65%" },
+          { top: "40%", left: "40%" }, { top: "55%", left: "78%" },
+          { top: "68%", left: "15%" }, { top: "78%", left: "55%" },
+        ].map((pos, i) => (
+          <div
+            key={i}
+            className="star-dot"
+            style={{
+              top: pos.top,
+              left: pos.left,
+              animationDelay: `${i * 0.8}s`,
+              animationDuration: `${3 + i * 0.5}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* 浮动光球 */}
       <div
         className="absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-[0.04]"
         style={{
-          background: "radial-gradient(circle, rgba(200,180,220,1) 0%, transparent 70%)",
+          background: "radial-gradient(circle, var(--accent-400) 0%, transparent 70%)",
         }}
       />
 
-      {/* Glass border overlay */}
-      <div className="absolute inset-y-0 right-0 w-px bg-gradient-to-b from-white/[0.08] via-white/[0.04] to-transparent" />
+      {/* 玻璃分割线 */}
+      <div className="absolute inset-y-0 right-0 w-px bg-gradient-to-b from-white/[0.06] via-white/[0.03] to-transparent" />
 
       <div className="relative z-10 flex flex-col h-full">
-        {/* Logo area */}
+        {/* Logo — CSS 月亮 + 品牌名 */}
         <div className="px-6 pt-7 pb-5">
-          <h1 className="font-serif text-xl font-semibold tracking-tight text-slate-100">
-            观心
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5 tracking-wider">
-            MINDWELL
-          </p>
+          <div className="flex items-center gap-3">
+            <MoonIcon size={28} glowing />
+            <div>
+              <h1 className="font-serif text-xl font-semibold tracking-tight" style={{ color: "var(--text-primary)" }}>
+                观心
+              </h1>
+              <p className="text-[10px] tracking-widest" style={{ color: "var(--text-tertiary)" }}>
+                MINDWELL
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* New chat button */}
+        {/* 新对话按钮 */}
         <div className="px-4 pb-4">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={createNewChat}
             className="w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium
-                       bg-white/[0.05] border border-white/[0.06] text-slate-300
-                       hover:bg-white/[0.08] hover:border-white/[0.1] hover:text-slate-100
-                       transition-all duration-300"
+                       transition-all duration-300 nav-item-hover"
+            style={{
+              background: "var(--bg-glass)",
+              border: "0.5px solid var(--border-light)",
+              color: "var(--text-secondary)",
+            }}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
@@ -111,7 +127,7 @@ export default function Sidebar({ userNickname, onLogout }: SidebarProps) {
           </motion.button>
         </div>
 
-        {/* Conversation list */}
+        {/* 对话列表 */}
         <div className="flex-1 overflow-y-auto px-3 pb-2">
           <AnimatePresence>
             {conversations.length > 0 && (
@@ -120,12 +136,17 @@ export default function Sidebar({ userNickname, onLogout }: SidebarProps) {
                   <motion.div key={conv.id} variants={itemAnim} className="group relative">
                     <button
                       onClick={() => selectConversation(conv.id)}
-                      className={cn(
-                        "w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-300 truncate block",
+                      className="w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-300 truncate block nav-item-hover"
+                      style={
                         activeId === conv.id
-                          ? "bg-white/[0.08] text-slate-100 font-medium"
-                          : "text-slate-400 hover:bg-white/[0.04] hover:text-slate-200"
-                      )}
+                          ? {
+                              background: "linear-gradient(135deg, color-mix(in srgb, var(--accent-400) 10%, transparent) 0%, color-mix(in srgb, var(--accent-300) 6%, transparent) 100%)",
+                              border: "1px solid color-mix(in srgb, var(--accent-400) 22%, transparent)",
+                              color: "var(--text-primary)",
+                              boxShadow: "inset 0 0 20px -8px color-mix(in srgb, var(--accent-400) 12%, transparent), 0 0 16px -6px color-mix(in srgb, var(--accent-400) 14%, transparent)",
+                            }
+                          : { color: "var(--text-secondary)", background: "transparent", border: "1px solid transparent" }
+                      }
                     >
                       {conv.title || "新对话"}
                     </button>
@@ -135,8 +156,8 @@ export default function Sidebar({ userNickname, onLogout }: SidebarProps) {
                         deleteConversation(conv.id);
                       }}
                       className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded-md
-                                 text-slate-600 hover:text-rose-400 opacity-0 group-hover:opacity-100
-                                 transition-all duration-200"
+                                 opacity-0 group-hover:opacity-100 transition-all duration-200"
+                      style={{ color: "var(--text-tertiary)" }}
                     >
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -154,16 +175,19 @@ export default function Sidebar({ userNickname, onLogout }: SidebarProps) {
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="h-9 rounded-lg bg-white/[0.03] animate-pulse"
-                  style={{ width: `${60 + i * 10}%` }}
+                  className="h-9 rounded-lg animate-pulse"
+                  style={{
+                    width: `${60 + i * 10}%`,
+                    background: "var(--bg-glass)",
+                  }}
                 />
               ))}
             </div>
           )}
 
           {!loading && conversations.length === 0 && (
-            <div className="text-center py-8">
-              <p className="text-xs text-slate-600 leading-relaxed">
+            <div className="text-center py-10 empty-atmosphere">
+              <p className="text-xs leading-relaxed" style={{ color: "var(--text-tertiary)" }}>
                 还没有对话
                 <br />
                 开始你的第一次倾诉
@@ -172,8 +196,11 @@ export default function Sidebar({ userNickname, onLogout }: SidebarProps) {
           )}
         </div>
 
-        {/* Navigation */}
-        <nav className="px-4 py-3 space-y-1 border-t border-white/[0.04]">
+        {/* 导航 — 情绪入口 */}
+        <nav
+          className="px-4 py-3 space-y-1 border-t"
+          style={{ borderColor: "var(--border-light)" }}
+        >
           {navItems.map((item, i) => (
             <motion.div
               key={item.to}
@@ -185,14 +212,24 @@ export default function Sidebar({ userNickname, onLogout }: SidebarProps) {
                 to={item.to}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300",
-                    isActive
-                      ? "bg-white/[0.08] text-slate-100"
-                      : "text-slate-400 hover:bg-white/[0.04] hover:text-slate-200"
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 nav-item-hover",
+                    isActive ? "nav-item-active" : ""
                   )
                 }
+                style={({ isActive }) =>
+                  isActive
+                    ? { color: "var(--text-primary)" }
+                    : { color: "var(--text-secondary)", background: "transparent" }
+                }
               >
-                <item.icon />
+                {/* CSS dot indicator */}
+                <span
+                  className="w-1.5 h-1.5 rounded-full shrink-0 transition-all duration-300"
+                  style={{
+                    background: "var(--accent-400)",
+                    opacity: 0.5,
+                  }}
+                />
                 <span>{item.label}</span>
               </NavLink>
             </motion.div>
@@ -200,19 +237,32 @@ export default function Sidebar({ userNickname, onLogout }: SidebarProps) {
         </nav>
 
         {/* User area */}
-        <div className="p-4 border-t border-white/[0.04]">
+        <div
+          className="p-4 border-t"
+          style={{ borderColor: "var(--border-light)" }}
+        >
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-white/[0.08] flex items-center justify-center text-slate-300 font-medium text-sm border border-white/[0.06]">
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium border"
+              style={{
+                background: "var(--bg-glass)",
+                borderColor: "var(--card-border)",
+                color: "var(--text-primary)",
+              }}
+            >
               {userNickname[0]?.toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-300 truncate">{userNickname}</p>
+              <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>
+                {userNickname}
+              </p>
             </div>
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={onLogout}
-              className="text-slate-600 hover:text-slate-400 transition-colors duration-200"
+              className="transition-colors duration-200"
+              style={{ color: "var(--text-tertiary)" }}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -223,63 +273,5 @@ export default function Sidebar({ userNickname, onLogout }: SidebarProps) {
         </div>
       </div>
     </motion.aside>
-  );
-}
-
-/* ── Icons ── */
-
-function HomeIcon() {
-  return (
-    <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-    </svg>
-  );
-}
-
-function ChatIcon() {
-  return (
-    <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-    </svg>
-  );
-}
-
-function EchoIcon() {
-  return (
-    <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-        d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-3.14-9.76A7.08 7.08 0 0112 3z" />
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-        d="M12 8l2 4-2 2-2-2 2-4z" />
-    </svg>
-  );
-}
-
-function MoodIcon() {
-  return (
-    <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-        d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  );
-}
-
-function AssessmentIcon() {
-  return (
-    <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-    </svg>
-  );
-}
-
-function NightIcon() {
-  return (
-    <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-        d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-    </svg>
   );
 }

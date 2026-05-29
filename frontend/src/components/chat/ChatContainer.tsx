@@ -35,29 +35,25 @@ export default function ChatContainer() {
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto px-4 pt-6">
         <div className="max-w-3xl mx-auto">
-          {/* Empty state — welcome */}
+          {/* Empty state — 深夜陪伴空间欢迎区 */}
           {messages.length === 0 && !crisisActive && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] as const }}
-              className="text-center py-20"
+              className="empty-atmosphere"
             >
-              {/* Breathing AI avatar */}
-              <div className="relative mx-auto mb-8 w-20 h-20">
-                <div className="absolute inset-0 rounded-full bg-lavender-400/10 animate-breathe" />
-                <div
-                  className="absolute inset-2 rounded-full bg-lavender-400/5 animate-breathe-slow"
-                  style={{ animationDelay: "-3s" }}
-                />
-                <div className="relative w-20 h-20 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
-                  <motion.span
-                    animate={{ opacity: [0.6, 1, 0.6] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    className="text-2xl"
-                  >
-                    🌙
-                  </motion.span>
+              {/* 呼吸光环 AI 头像 — 纯 CSS breathing-presence */}
+              <div className="relative mx-auto mb-8">
+                <div className="breathing-presence w-20 h-20 flex items-center justify-center mx-auto">
+                  {/* CSS 月亮符号 */}
+                  <div
+                    className="w-8 h-8 rounded-full"
+                    style={{
+                      background: "radial-gradient(circle at 35% 35%, var(--accent-300) 0%, var(--accent-400) 50%, var(--accent-500) 100%)",
+                      boxShadow: "0 0 16px -4px var(--accent-400)",
+                    }}
+                  />
                 </div>
               </div>
 
@@ -65,7 +61,8 @@ export default function ChatContainer() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.6 }}
-                className="font-serif text-2xl font-medium text-slate-200 mb-3 tracking-tight"
+                className="font-serif text-2xl font-medium mb-3 tracking-tight relative z-10"
+                style={{ color: "var(--text-primary)" }}
               >
                 我在认真听
               </motion.h2>
@@ -73,17 +70,18 @@ export default function ChatContainer() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6, duration: 0.6 }}
-                className="text-slate-500 max-w-sm mx-auto leading-relaxed text-sm"
+                className="max-w-sm mx-auto leading-relaxed text-sm relative z-10"
+                style={{ color: "var(--text-secondary)" }}
               >
                 你不用组织语言，想到什么都可以说。
               </motion.p>
 
-              {/* Quick suggestion chips */}
+              {/* 快捷建议 chips — 玻璃胶囊 */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.8, duration: 0.6 }}
-                className="mt-8 flex flex-wrap justify-center gap-2.5"
+                className="mt-8 flex flex-wrap justify-center gap-2.5 relative z-10"
               >
                 {[
                   "今天有什么有趣的事情分享吗",
@@ -94,10 +92,7 @@ export default function ChatContainer() {
                   <button
                     key={phrase}
                     onClick={() => sendMessage(phrase)}
-                    className="px-4 py-2 rounded-full text-sm text-slate-400
-                               bg-white/[0.03] border border-white/[0.05]
-                               hover:bg-white/[0.06] hover:text-slate-200 hover:border-white/[0.1]
-                               transition-all duration-300"
+                    className="suggestion-chip"
                   >
                     {phrase}
                   </button>
@@ -120,8 +115,12 @@ export default function ChatContainer() {
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="bg-moon-400/10 border border-moon-400/15 rounded-2xl px-4 py-3 mb-4 text-sm text-moon-200"
-                style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+                className="rounded-2xl px-4 py-3 mb-4 text-sm glass-light"
+                style={{
+                  background: "color-mix(in srgb, var(--accent-400) 8%, transparent)",
+                  borderColor: "color-mix(in srgb, var(--accent-400) 18%, transparent)",
+                  color: "var(--accent-300)",
+                }}
               >
                 已标记安全关注点 — AI 回复已加入安全引导
               </motion.div>
@@ -142,14 +141,27 @@ export default function ChatContainer() {
               animate={{ opacity: 1 }}
               className="flex gap-3 mb-5"
             >
-              <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-lavender-300 text-xs font-medium shrink-0">
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0"
+                style={{
+                  background: "var(--bg-glass)",
+                  border: "0.5px solid var(--card-border)",
+                  color: "var(--accent-300)",
+                }}
+              >
                 M
               </div>
               <div
-                className="bg-white/[0.03] border border-white/[0.05] rounded-2xl rounded-tl-sm px-4 py-3 max-w-[72%]"
-                style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+                className="rounded-2xl rounded-tl-sm px-4 py-3 max-w-[72%]"
+                style={{
+                  background: "var(--bg-glass)",
+                  border: "0.5px solid var(--border-light)",
+                  color: "var(--text-primary)",
+                  backdropFilter: "blur(16px)",
+                  WebkitBackdropFilter: "blur(16px)",
+                }}
               >
-                <p className="text-sm whitespace-pre-wrap break-words text-slate-300">
+                <p className="text-sm whitespace-pre-wrap break-words">
                   {streamingContent}
                 </p>
               </div>
@@ -166,13 +178,18 @@ export default function ChatContainer() {
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="bg-rose-500/10 border border-rose-400/15 rounded-2xl px-4 py-3 mb-4 text-sm text-rose-200 flex items-center justify-between"
-                style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+                className="rounded-2xl px-4 py-3 mb-4 text-sm flex items-center justify-between glass-light"
+                style={{
+                  background: "rgba(239,68,68,0.08)",
+                  borderColor: "rgba(239,68,68,0.15)",
+                  color: "var(--text-primary)",
+                }}
               >
                 <span>{error}</span>
                 <button
                   onClick={clearError}
-                  className="text-rose-300 hover:text-rose-100 ml-2 font-medium transition-colors"
+                  className="opacity-60 hover:opacity-100 ml-2 font-medium transition-opacity"
+                  style={{ color: "var(--text-secondary)" }}
                 >
                   关闭
                 </button>

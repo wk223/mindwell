@@ -1,127 +1,632 @@
-/* ===== CSS Custom Properties ===== */
+/* ================================================================
+   「观心」CSS Custom Properties — 三层 Token 系统
+   Layer 1: :root      → 日间模式 (08:00–19:59)
+   Layer 2: .night-theme → 深夜模式 (20:00–07:59)
+   Layer 3: .mood-*    → 情绪反馈覆盖 (happy / calm / sad / neutral)
+   ================================================================ */
+
+/* ===== Layer 1 — 日间 Token (default) ===== */
 :root {
-  /* Page background */
-  --bg-page: #fbf8f4;
-  --bg-page-end: #f0ecf5;
+  /* ── Page background ── */
+  --bg-deep: #f8fafc;
+  --bg-mid: #f1f5f9;
+  --bg-surface: rgba(255, 255, 255, 0.55);
+  --bg-page: #f8fafc;
+  --bg-page-end: #e8f5e9;
 
-  /* Card surfaces */
-  --bg-card: rgba(255, 255, 255, 0.7);
-  --bg-card-hover: rgba(255, 255, 255, 0.85);
-  --bg-input: #f8f5f0;
-  --bg-glass: rgba(255, 255, 255, 0.6);
+  /* ── Card surfaces ── */
+  --bg-card: rgba(255, 255, 255, 0.55);
+  --bg-card-hover: rgba(255, 255, 255, 0.75);
+  --bg-input: rgba(248, 250, 252, 0.7);
+  --bg-glass: rgba(255, 255, 255, 0.5);
 
-  /* Accent — defaults to mint (calm/neutral) */
-  --accent-50: #f2faf6;
-  --accent-100: #e0f5e8;
-  --accent-200: #b8e8cf;
-  --accent-300: #8cd8b0;
-  --accent-400: #5dc48d;
-  --accent-500: #3dab70;
-  --accent-600: #2d8f5a;
+  /* ── Text ── */
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --text-inverse: #e2e8f0;
 
-  /* Text */
-  --text-primary: #1f2937;
-  --text-secondary: #6b7280;
-  --text-tertiary: #9ca3af;
+  /* ── Accent — day mint/green ── */
+  --accent-50: #f0fdf4;
+  --accent-100: #dcfce7;
+  --accent-200: #bbf7d0;
+  --accent-300: #86efac;
+  --accent-400: #4ade80;
+  --accent-500: #22c55e;
+  --accent-600: #16a34a;
 
-  /* Border */
-  --border-light: rgba(229, 223, 211, 0.6);
-  --border-medium: rgba(229, 223, 211, 0.4);
+  /* ── Border ── */
+  --border-light: rgba(226, 232, 240, 0.6);
+  --border-medium: rgba(226, 232, 240, 0.35);
+  --card-border: rgba(226, 232, 240, 0.5);
+  --card-border-hover: rgba(134, 239, 172, 0.3);
 
-  /* Shadows */
-  --shadow-soft: 0 2px 16px rgba(0, 0, 0, 0.04);
-  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.05);
-  --shadow-glow: 0 0 20px rgba(141, 200, 176, 0.3);
-  --shadow-glow-strong: 0 0 35px rgba(141, 200, 176, 0.15);
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 40px -12px rgba(0, 0, 0, 0.1);
+  --glow-moon: 0 0 120px -30px rgba(251, 191, 36, 0.12);
+  --glow-accent: 0 0 40px -10px rgba(134, 239, 172, 0.2);
+  --glow-accent-strong: 0 0 60px -15px rgba(134, 239, 172, 0.15);
 
-  /* Radius */
-  --radius-sm: 12px;
-  --radius-md: 16px;
+  /* ── Particles ── */
+  --particle-color: rgba(134, 239, 172, 0.55);
+  --particle-color-warm: rgba(251, 191, 36, 0.35);
+
+  /* ── Breathing / glow ── */
+  --breathing-color: rgba(134, 239, 172, 0.25);
+  --breathing-color-strong: rgba(134, 239, 172, 0.4);
+
+  /* ── Radius ── */
+  --radius-sm: 10px;
+  --radius-md: 14px;
   --radius-lg: 20px;
   --radius-xl: 24px;
+  --radius-2xl: 28px;
+
+  /* ── Transition preset ── */
+  --transition-theme:
+    background 1.8s cubic-bezier(0.4, 0, 0.2, 1),
+    color 1.4s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 1.8s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 2s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 1.6s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-surface: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  --transition-bounce: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ===== Mood-driven theme overrides ===== */
+/* ===== Layer 2 — 深夜 Token ===== */
+.night-theme {
+  --bg-deep: #020617;
+  --bg-mid: #071426;
+  --bg-surface: rgba(15, 23, 42, 0.55);
+  --bg-page: #020617;
+  --bg-page-end: #0f172a;
+
+  --bg-card: rgba(15, 23, 42, 0.5);
+  --bg-card-hover: rgba(30, 41, 59, 0.6);
+  --bg-input: rgba(15, 23, 42, 0.55);
+  --bg-glass: rgba(15, 23, 42, 0.45);
+
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --text-inverse: #1e293b;
+
+  --accent-50: #1e1b4b;
+  --accent-100: #312e81;
+  --accent-200: #4c1d95;
+  --accent-300: #7c3aed;
+  --accent-400: #8b5cf6;
+  --accent-500: #a78bfa;
+  --accent-600: #c4b5fd;
+
+  --border-light: rgba(51, 65, 85, 0.45);
+  --border-medium: rgba(51, 65, 85, 0.3);
+  --card-border: rgba(51, 65, 85, 0.4);
+  --card-border-hover: rgba(139, 92, 246, 0.25);
+
+  --shadow-sm: 0 1px 8px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 48px -16px rgba(0, 0, 0, 0.4);
+  --glow-moon: 0 0 180px -40px rgba(139, 92, 246, 0.18);
+  --glow-accent: 0 0 60px -15px rgba(139, 92, 246, 0.25);
+  --glow-accent-strong: 0 0 80px -20px rgba(139, 92, 246, 0.2);
+
+  --particle-color: rgba(139, 92, 246, 0.5);
+  --particle-color-warm: rgba(251, 191, 36, 0.25);
+
+  --breathing-color: rgba(139, 92, 246, 0.25);
+  --breathing-color-strong: rgba(139, 92, 246, 0.4);
+}
+
+/* ===== Layer 3 — 情绪反馈覆盖 ===== */
+/* 开心 — 暖金，粒子增多，光更暖 */
 .mood-happy {
-  --accent-400: #facc15;
-  --accent-500: #eab308;
-  --accent-600: #ca8a04;
-  --shadow-glow: 0 0 20px rgba(250, 204, 21, 0.3);
-  --shadow-glow-strong: 0 0 35px rgba(250, 204, 21, 0.15);
+  --accent-300: #facc15;
+  --accent-400: #fbbf24;
+  --accent-500: #f59e0b;
+  --accent-600: #d97706;
+  --glow-accent: 0 0 50px -10px rgba(250, 204, 21, 0.3);
+  --glow-accent-strong: 0 0 70px -15px rgba(250, 204, 21, 0.2);
+  --particle-color: rgba(250, 204, 21, 0.55);
+  --breathing-color: rgba(250, 204, 21, 0.3);
 }
 
+/* 平静 — 柔和薄荷，默认令牌 */
 .mood-calm {
-  --accent-400: #5dc48d;
-  --accent-500: #3dab70;
-  --accent-600: #2d8f5a;
-  --shadow-glow: 0 0 20px rgba(141, 200, 176, 0.3);
-  --shadow-glow-strong: 0 0 35px rgba(141, 200, 176, 0.15);
+  --accent-300: #86efac;
+  --accent-400: #4ade80;
+  --accent-500: #22c55e;
+  --accent-600: #16a34a;
+  --glow-accent: 0 0 40px -10px rgba(134, 239, 172, 0.25);
+  --glow-accent-strong: 0 0 55px -15px rgba(134, 239, 172, 0.15);
+  --particle-color: rgba(134, 239, 172, 0.5);
+  --breathing-color: rgba(134, 239, 172, 0.25);
 }
 
+/* 低落 — 冷紫雾，粒子减少，光更冷 */
 .mood-sad {
-  --accent-400: #8f7ac3;
-  --accent-500: #765fb2;
-  --accent-600: #644e9e;
-  --shadow-glow: 0 0 20px rgba(143, 122, 195, 0.25);
-  --shadow-glow-strong: 0 0 35px rgba(143, 122, 195, 0.12);
+  --accent-300: #a78bfa;
+  --accent-400: #8b5cf6;
+  --accent-500: #7c3aed;
+  --accent-600: #6d28d9;
+  --glow-accent: 0 0 30px -15px rgba(139, 92, 246, 0.15);
+  --glow-accent-strong: 0 0 40px -20px rgba(139, 92, 246, 0.1);
+  --particle-color: rgba(100, 116, 139, 0.35);
+  --breathing-color: rgba(100, 116, 139, 0.15);
 }
 
+/* 中性 — 柔和薄荷（同 calm） */
 .mood-neutral {
-  --accent-400: #5dc48d;
-  --accent-500: #3dab70;
-  --accent-600: #2d8f5a;
-  --shadow-glow: 0 0 20px rgba(141, 200, 176, 0.3);
-  --shadow-glow-strong: 0 0 35px rgba(141, 200, 176, 0.15);
+  --accent-300: #86efac;
+  --accent-400: #4ade80;
+  --accent-500: #22c55e;
+  --accent-600: #16a34a;
+  --glow-accent: 0 0 40px -10px rgba(134, 239, 172, 0.25);
+  --glow-accent-strong: 0 0 55px -15px rgba(134, 239, 172, 0.15);
+  --particle-color: rgba(134, 239, 172, 0.5);
+  --breathing-color: rgba(134, 239, 172, 0.25);
 }
 
-/* ===== Keyframe Animations ===== */
-@keyframes breathe {
+/* ================================================================
+   Keyframes — 情绪化缓动曲线
+   ================================================================ */
+
+/* ── 月光呼吸 ── */
+@keyframes moonlight-breathe {
   0%, 100% { transform: scale(1); opacity: 0.85; }
-  50% { transform: scale(1.05); opacity: 1; }
+  50% { transform: scale(1.04); opacity: 1; }
 }
 
-@keyframes float {
+/* ── 月光流动扫过 (hover ::after) ── */
+@keyframes moonlight-sweep {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ── 星光闪烁 (随机相位) ── */
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  30% { opacity: 0.9; transform: scale(1.2); }
+  60% { opacity: 0.4; transform: scale(0.9); }
+}
+
+/* ── 浮动 ── */
+@keyframes float-gentle {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-8px); }
 }
 
-@keyframes float-delayed {
+@keyframes float-slow {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
+  25% { transform: translateY(-12px); }
+  75% { transform: translateY(6px); }
 }
 
-@keyframes fadeInUp {
+/* ── 情绪球浮动 ── */
+@keyframes emotion-float {
+  0%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-10px); }
+  60% { transform: translateY(-4px); }
+}
+
+/* ── 呼吸光环 (AI 头像 / 空状态) ── */
+@keyframes presence-breathe {
+  0%, 100% {
+    box-shadow:
+      0 0 0 8px var(--breathing-color),
+      0 0 0 24px color-mix(in srgb, var(--breathing-color) 25%, transparent),
+      0 0 0 48px color-mix(in srgb, var(--breathing-color) 8%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 0 16px var(--breathing-color),
+      0 0 0 40px color-mix(in srgb, var(--breathing-color) 15%, transparent),
+      0 0 0 72px color-mix(in srgb, var(--breathing-color) 4%, transparent);
+  }
+}
+
+/* ── 淡入上移 ── */
+@keyframes fade-in-up {
   from { opacity: 0; transform: translateY(24px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes fadeIn {
+@keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-@keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(141, 200, 176, 0.2); }
-  50% { box-shadow: 0 0 40px rgba(141, 200, 176, 0.4); }
+/* ── 意识浮现 (ECHO answer reveal) ── */
+@keyframes consciousness-reveal {
+  0% { opacity: 0; filter: blur(16px); transform: translateY(12px) scale(0.96); }
+  30% { opacity: 0.3; filter: blur(12px); }
+  60% { opacity: 0.7; filter: blur(4px); transform: translateY(0) scale(0.99); }
+  100% { opacity: 1; filter: blur(0); transform: translateY(0) scale(1); }
 }
 
-@keyframes drift {
+/* ── 逐字浮现 ── */
+@keyframes char-appear {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── 大范围漂移 (氛围光球) ── */
+@keyframes drift-wide {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(20px, -15px) scale(1.02); }
-  50% { transform: translate(-10px, 10px) scale(0.98); }
-  75% { transform: translate(-25px, -5px) scale(1.01); }
+  25% { transform: translate(30px, -20px) scale(1.03); }
+  50% { transform: translate(-15px, 15px) scale(0.97); }
+  75% { transform: translate(-35px, -8px) scale(1.02); }
 }
 
-/* ===== Hero moon (CSS-only crescent) ===== */
+/* ── 光晕扩散 ── */
+@keyframes glow-expand {
+  0% { opacity: 0; transform: scale(0.8); filter: blur(20px); }
+  50% { opacity: 0.6; filter: blur(8px); }
+  100% { opacity: 0; transform: scale(1.5); filter: blur(40px); }
+}
+
+/* ── 流光扫过 ── */
+@keyframes shimmer-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+/* ── 脉动柔光 ── */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.85; }
+}
+
+/* ================================================================
+   CSS 视觉组件 — 零 emoji，纯 CSS shape
+   ================================================================ */
+
+/* ── 月亮 (CSS crescent) ── */
+.moon-crescent {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fef3c7 0%, #fbbf24 40%, #d97706 100%);
+  box-shadow:
+    0 0 40px rgba(251, 191, 36, 0.2),
+    0 0 80px rgba(251, 191, 36, 0.08),
+    0 0 120px rgba(251, 191, 36, 0.04);
+  position: relative;
+  animation: moonlight-breathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+.moon-crescent::after {
+  content: '';
+  position: absolute;
+  top: 5%;
+  right: 10%;
+  width: 35%;
+  height: 35%;
+  border-radius: 50%;
+  background: var(--bg-deep);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.06);
+}
+
+/* ── 星星 (CSS dot + radial glow) ── */
+.star-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, transparent 70%);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+  position: absolute;
+  animation: star-twinkle 4s ease-in-out infinite;
+}
+
+/* 大星点 */
+.star-dot-lg {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(200, 180, 220, 0.4) 50%, transparent 80%);
+  box-shadow:
+    0 0 8px rgba(200, 180, 220, 0.4),
+    0 0 16px rgba(200, 180, 220, 0.1);
+  position: absolute;
+  animation: star-twinkle 6s ease-in-out infinite;
+}
+
+/* ── 玻璃拟态 (glassmorphism 三档) ── */
+.glass-surface {
+  background: var(--bg-card);
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 8px 32px -12px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.04);
+}
+
+.glass-heavy {
+  background: var(--bg-card);
+  backdrop-filter: blur(40px) saturate(1.4);
+  -webkit-backdrop-filter: blur(40px) saturate(1.4);
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 12px 48px -16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.06);
+}
+
+.glass-light {
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  border: 0.5px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 2px 16px -6px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+}
+
+/* ── 卡片三级系统 ── */
+.card-primary {
+  padding: 32px;
+  border-radius: var(--radius-2xl);
+  background: var(--bg-card);
+  backdrop-filter: blur(28px) saturate(1.3);
+  -webkit-backdrop-filter: blur(28px) saturate(1.3);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--glow-accent), var(--shadow-lg);
+  transition: box-shadow 0.6s cubic-bezier(0.23, 1, 0.32, 1),
+              transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.card-primary:hover {
+  box-shadow: 0 0 60px -10px var(--accent-400), var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.card-secondary {
+  padding: 20px;
+  border-radius: var(--radius-xl);
+  background: var(--bg-card);
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-md);
+  transition: box-shadow 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.card-secondary:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.card-tertiary {
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg-glass);
+  border: 0.5px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-surface);
+}
+.card-tertiary:hover {
+  background: var(--bg-card);
+}
+
+/* ── 月光导航激活态 ── */
+.nav-item-active {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent-400) 10%, transparent) 0%,
+    color-mix(in srgb, var(--accent-300) 6%, transparent) 100%
+  );
+  border: 1px solid color-mix(in srgb, var(--accent-400) 22%, transparent);
+  box-shadow:
+    inset 0 0 20px -8px color-mix(in srgb, var(--accent-400) 12%, transparent),
+    0 0 16px -6px color-mix(in srgb, var(--accent-400) 14%, transparent);
+}
+
+/* ── 导航项 hover 月光流动 ── */
+.nav-item-hover {
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition-surface);
+}
+.nav-item-hover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.05) 48%,
+    transparent 66%
+  );
+  background-size: 200% 100%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.nav-item-hover:hover::after {
+  opacity: 1;
+  animation: moonlight-sweep 2.5s ease-in-out infinite;
+}
+
+/* ── 呼吸光环 (AI 头像 / 空状态中心) ── */
+.breathing-presence {
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--card-border);
+  animation: presence-breathe 6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+/* ── 流光胶囊按钮 ── */
+.btn-luminous {
+  position: relative;
+  overflow: hidden;
+  border-radius: 999px;
+  padding: 14px 40px;
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent-400) 15%, transparent),
+    color-mix(in srgb, var(--accent-300) 10%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--accent-400) 25%, transparent);
+  box-shadow:
+    0 0 24px -6px color-mix(in srgb, var(--accent-400) 18%, transparent),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+  transition: var(--transition-surface);
+}
+.btn-luminous::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.12) 50%,
+    transparent 60%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.btn-luminous:hover {
+  box-shadow:
+    0 0 40px -8px color-mix(in srgb, var(--accent-400) 30%, transparent),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  transform: scale(1.02);
+}
+.btn-luminous:hover::after {
+  transform: translateX(100%);
+}
+.btn-luminous:active {
+  transform: scale(0.97);
+}
+.btn-luminous:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-luminous:disabled::after {
+  display: none;
+}
+
+/* ── 情绪球 (CSS floating orbs) ── */
+.emotion-orb {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 35%,
+    rgba(255, 255, 255, 0.35) 0%,
+    var(--breathing-color) 60%,
+    transparent 100%
+  );
+  box-shadow:
+    0 4px 20px -4px var(--breathing-color),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  animation: emotion-float 5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  transition: var(--transition-bounce);
+  cursor: pointer;
+}
+.emotion-orb:hover {
+  transform: scale(1.2) translateY(-8px);
+  box-shadow:
+    0 8px 32px -8px var(--breathing-color-strong),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+}
+.emotion-orb.selected {
+  transform: scale(1.25);
+  box-shadow:
+    0 0 0 3px var(--breathing-color-strong),
+    0 8px 32px -8px var(--breathing-color),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+}
+
+/* ── 纸条风格输入 ── */
+.memo-paper {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 30px,
+      color-mix(in srgb, var(--text-tertiary) 6%, transparent) 30px,
+      color-mix(in srgb, var(--text-tertiary) 6%, transparent) 31px
+    );
+  background-color: var(--bg-surface);
+  border-left: 2px solid var(--card-border);
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  box-shadow: inset 2px 0 8px -4px rgba(0, 0, 0, 0.06);
+}
+
+/* ── 空状态氛围 ── */
+.empty-atmosphere {
+  text-align: center;
+  padding: 80px 24px;
+  position: relative;
+}
+.empty-atmosphere::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--breathing-color) 0%,
+    transparent 70%
+  );
+  animation: presence-breathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  pointer-events: none;
+}
+
+/* ── 意识浮现动画应用 ── */
+.consciousness-reveal {
+  animation: consciousness-reveal 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── 逐字 (character reveal) ── */
+.reveal-char {
+  display: inline-block;
+  opacity: 0;
+  animation: char-appear 0.35s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* ── 光晕扩散 (ECHO answer background pulse) ── */
+.glow-expand-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at center,
+    color-mix(in srgb, var(--accent-400) 8%, transparent) 30%,
+    transparent 70%
+  );
+  animation: glow-expand 2s ease-out forwards;
+  pointer-events: none;
+}
+
+/* ================================================================
+   旧版兼容类 (平滑迁移)
+   ================================================================ */
+
+/* Hero moon — 保留但升级 */
 .hero-moon {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #fde68a 0%, #fbbf24 40%, #f59e0b 100%);
+  background: radial-gradient(circle at 35% 35%, #fef3c7 0%, #fbbf24 40%, #d97706 100%);
   box-shadow:
     0 0 60px rgba(251, 191, 36, 0.25),
     0 0 120px rgba(251, 191, 36, 0.08);
   position: relative;
+  animation: moonlight-breathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 .hero-moon::after {
   content: '';
@@ -131,154 +636,13 @@
   width: 35%;
   height: 35%;
   border-radius: 50%;
-  background: var(--bg-page, #fefcf8);
+  background: var(--bg-deep);
   box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.03);
 }
 
-/* ===== Paper texture for journal/memo feel ===== */
-.paper-texture {
-  background-color: #fefdfb;
-  background-image:
-    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px);
-  background-size: 100% 28px;
-}
-
-/* ===== Card hierarchy ===== */
-.card-primary {
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: var(--radius-xl, 24px);
-  padding: 28px;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.04);
-  transition: box-shadow 0.4s ease, transform 0.3s ease;
-}
-.card-primary:hover {
-  box-shadow: 0 4px 30px rgba(141, 200, 176, 0.12);
-  transform: translateY(-1px);
-}
-
-.card-secondary {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  border-radius: var(--radius-lg, 20px);
-  padding: 18px 20px;
-  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.03);
-  transition: box-shadow 0.3s ease;
-}
-.card-secondary:hover {
-  box-shadow: 0 3px 20px rgba(0, 0, 0, 0.05);
-}
-
-.card-tertiary {
-  background: rgba(255, 255, 255, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: var(--radius-md, 16px);
-  padding: 12px 16px;
-}
-
-/* ===== Ambient dots ===== */
-.ambient-dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--accent-300, #8cd8b0);
-  opacity: 0.35;
-  position: absolute;
-}
-
-/* ===== Underline input (journal style) ===== */
-.input-underline {
-  width: 100%;
-  background: transparent;
-  border: none;
-  border-bottom: 1.5px solid var(--border-light, rgba(229, 223, 211, 0.8));
-  padding: 8px 4px;
-  font-size: 15px;
-  color: var(--text-primary, #1f2937);
-  transition: border-color 0.3s ease;
-  outline: none;
-}
-.input-underline:focus {
-  border-bottom-color: var(--accent-400, #5dc48d);
-  border-bottom-width: 2px;
-}
-.input-underline::placeholder {
-  color: var(--text-tertiary, #9ca3af);
-}
-
-/* ===== River timeline ===== */
-.river-timeline {
-  position: relative;
-  padding: 0;
-}
-.river-timeline::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 1.5px;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    var(--accent-300, #8cd8b0) 10%,
-    var(--accent-300, #8cd8b0) 90%,
-    transparent 100%
-  );
-  opacity: 0.5;
-}
-.river-entry {
-  position: relative;
-  width: 50%;
-  padding: 12px 24px;
-}
-.river-entry.left {
-  left: 0;
-  padding-right: 32px;
-}
-.river-entry.right {
-  left: 50%;
-  padding-left: 32px;
-}
-.river-node {
-  position: absolute;
-  top: 50%;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--accent-400, #5dc48d);
-  border: 2px solid white;
-  box-shadow: 0 0 8px rgba(141, 200, 176, 0.4);
-  transform: translateY(-50%);
-}
-.river-entry.left .river-node {
-  right: -5px;
-}
-.river-entry.right .river-node {
-  left: -5px;
-}
-
-/* ===== Suggestion chips ===== */
-.suggestion-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 16px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid var(--border-light, rgba(229, 223, 211, 0.6));
-  color: var(--text-secondary, #6b7280);
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  opacity: 0;
-  animation: fadeInUp 0.5s ease-out forwards;
-}
-.suggestion-chip:hover {
-  background: rgba(255, 255, 255, 0.8);
-  border-color: var(--accent-300, #8cd8b0);
-  color: var(--text-primary, #1f2937);
-}
+/* 旧版兼容 */
+.paper-texture { display: none; }
+.input-underline { display: none; }
+.river-timeline, .river-entry, .river-node { display: none; }
+.suggestion-chip { display: none; }
+.ambient-dot { display: none; }

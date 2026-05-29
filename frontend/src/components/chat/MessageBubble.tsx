@@ -10,11 +10,10 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
   const isUser = message.role === "user";
 
   const renderAgentLabel = () => {
-    // Normalize: backend sends snake_case agent_id, frontend type uses camelCase agentId
     const agent = (message as any).agent_id || message.agentId;
     if (!agent || isUser) return null;
     return (
-      <span className="block mt-1.5 text-[11px] text-slate-600">
+      <span className="block mt-1.5 text-[11px]" style={{ color: "var(--text-tertiary)" }}>
         {agent === "crisis" ? "安全助手" : "MindWell AI"}
       </span>
     );
@@ -29,27 +28,29 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
     >
       {/* Avatar */}
       <div
-        className={cn(
-          "w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-medium border",
-          isUser
-            ? "bg-white/[0.06] border-white/[0.08] text-slate-400"
-            : "bg-white/[0.06] border-white/[0.08] text-lavender-300"
-        )}
+        className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-medium"
+        style={{
+          background: isUser ? "var(--bg-glass)" : "var(--bg-card)",
+          border: "0.5px solid var(--card-border)",
+          color: isUser ? "var(--text-secondary)" : "var(--accent-300)",
+        }}
       >
         {isUser ? "我" : "M"}
       </div>
 
-      {/* Bubble */}
+      {/* Bubble — glassmorphism */}
       <div
-        className={cn(
-          "max-w-[72%] rounded-2xl px-4 py-3 text-sm leading-relaxed",
-          isUser
-            ? "bg-white/[0.06] border border-white/[0.08] text-slate-200 rounded-tr-sm shadow-inner-glow"
-            : "bg-white/[0.03] border border-white/[0.05] text-slate-300 rounded-tl-sm shadow-inner-glow"
-        )}
+        className="max-w-[72%] rounded-2xl px-4 py-3 text-sm leading-relaxed"
         style={{
-          backdropFilter: "blur(8px)",
-          WebkitBackdropFilter: "blur(8px)",
+          background: isUser
+            ? "color-mix(in srgb, var(--bg-card) 80%, transparent)"
+            : "var(--bg-glass)",
+          border: "0.5px solid var(--card-border)",
+          color: "var(--text-primary)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          borderRadius: isUser ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+          boxShadow: "inset 0 1px 0 0 rgba(255,255,255,0.04)",
         }}
       >
         <p className="whitespace-pre-wrap break-words">{message.content}</p>

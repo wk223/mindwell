@@ -5,6 +5,16 @@ export default {
   theme: {
     extend: {
       colors: {
+        // ── Day mode palette (温柔治愈系) ──
+        day: {
+          50: "#f8fafc",
+          100: "#f1f5f9",
+          200: "#e2e8f0",
+          300: "#cbd5e1",
+          400: "#94a3b8",
+          500: "#64748b",
+          600: "#475569",
+        },
         // ── Deep space core (backgrounds) ──
         void: {
           950: "#03050c",
@@ -107,6 +117,8 @@ export default {
         "glow-md": "0 0 40px -10px rgba(201, 141, 50, 0.2)",
         "glow-lg": "0 0 80px -20px rgba(201, 141, 50, 0.25)",
         "moon": "0 0 120px -30px rgba(200, 180, 220, 0.15)",
+        "moon-glow": "0 0 200px -40px rgba(139, 92, 246, 0.2)",
+        "breathing-ring": "0 0 0 8px rgba(139, 92, 246, 0.1), 0 0 0 24px rgba(139, 92, 246, 0.04)",
         "inner-glow": "inset 0 1px 0 0 rgba(255, 255, 255, 0.04)",
       },
       animation: {
@@ -117,6 +129,13 @@ export default {
         "twinkle": "twinkle 4s ease-in-out infinite",
         "shimmer": "shimmer 6s linear infinite",
         "pulse-soft": "pulse-soft 4s ease-in-out infinite",
+        "moonlight-sweep": "moonlightSweep 2.5s ease-in-out infinite",
+        "star-twinkle": "starTwinkle 4s ease-in-out infinite",
+        "consciousness-reveal": "consciousnessReveal 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+        "emotion-float": "emotionFloat 5s cubic-bezier(0.45, 0, 0.55, 1) infinite",
+        "presence-breathe": "presenceBreathe 6s cubic-bezier(0.45, 0, 0.55, 1) infinite",
+        "char-appear": "charAppear 0.35s cubic-bezier(0.23, 1, 0.32, 1) forwards",
+        "glow-expand": "glowExpand 2s ease-out forwards",
       },
       keyframes: {
         breathe: {
@@ -139,6 +158,39 @@ export default {
         "pulse-soft": {
           "0%, 100%": { opacity: "0.5" },
           "50%": { opacity: "0.9" },
+        },
+        moonlightSweep: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+        starTwinkle: {
+          "0%, 100%": { opacity: "0.2", transform: "scale(0.8)" },
+          "30%": { opacity: "0.9", transform: "scale(1.2)" },
+          "60%": { opacity: "0.4", transform: "scale(0.9)" },
+        },
+        consciousnessReveal: {
+          "0%": { opacity: "0", filter: "blur(16px)", transform: "translateY(12px) scale(0.96)" },
+          "30%": { opacity: "0.3", filter: "blur(12px)" },
+          "60%": { opacity: "0.7", filter: "blur(4px)", transform: "translateY(0) scale(0.99)" },
+          "100%": { opacity: "1", filter: "blur(0)", transform: "translateY(0) scale(1)" },
+        },
+        emotionFloat: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "30%": { transform: "translateY(-10px)" },
+          "60%": { transform: "translateY(-4px)" },
+        },
+        presenceBreathe: {
+          "0%, 100%": { boxShadow: "0 0 0 8px rgba(139,92,246,0.1), 0 0 0 24px rgba(139,92,246,0.04)" },
+          "50%": { boxShadow: "0 0 0 16px rgba(139,92,246,0.06), 0 0 0 40px rgba(139,92,246,0.02)" },
+        },
+        charAppear: {
+          "from": { opacity: "0", transform: "translateY(6px)" },
+          "to": { opacity: "1", transform: "translateY(0)" },
+        },
+        glowExpand: {
+          "0%": { opacity: "0", transform: "scale(0.8)", filter: "blur(20px)" },
+          "50%": { opacity: "0.6", filter: "blur(8px)" },
+          "100%": { opacity: "0", transform: "scale(1.5)", filter: "blur(40px)" },
         },
       },
       borderRadius: {

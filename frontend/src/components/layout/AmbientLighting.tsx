@@ -1,30 +1,29 @@
+/**
+ * 氛围光 — 全屏光球，使用 CSS Variables 跟随日夜+情绪切换
+ * 三个光球：右上主色 / 左下辅色 / 中心暖光
+ */
 export default function AmbientLighting() {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-      {/* Top-right warm orb */}
+      {/* 右上主色光球 — 跟随 accent */}
       <div
-        className="absolute -top-[20%] -right-[10%] w-[60%] h-[60%] rounded-full animate-drift"
-        style={{
-          background: "radial-gradient(circle, rgba(141,200,176,0.18) 0%, rgba(141,200,176,0.06) 40%, transparent 70%)",
-          filter: "blur(80px)",
-        }}
+        className="absolute -top-[15%] -right-[8%] w-[55%] h-[55%] rounded-full deep-space-orb-moon"
       />
-      {/* Bottom-left cool orb */}
+
+      {/* 左下辅色光球 — 冷紫/暖绿 */}
       <div
-        className="absolute -bottom-[10%] -left-[10%] w-[50%] h-[50%] rounded-full"
-        style={{
-          background: "radial-gradient(circle, rgba(173,156,213,0.15) 0%, rgba(173,156,213,0.05) 40%, transparent 70%)",
-          filter: "blur(80px)",
-          animation: "drift 30s ease-in-out 10s infinite",
-        }}
+        className="absolute -bottom-[8%] -left-[8%] w-[45%] h-[45%] rounded-full deep-space-orb-warm"
       />
-      {/* Center subtle warm glow */}
+
+      {/* 中心柔光 — 低强度，减少大面积暗区 */}
       <div
-        className="absolute top-[30%] left-[30%] w-[40%] h-[40%] rounded-full"
+        className="absolute top-[25%] left-[25%] w-[40%] h-[40%] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(253,239,242,0.12) 0%, transparent 60%)",
+          background:
+            "radial-gradient(circle, color-mix(in srgb, var(--particle-color-warm) 40%, transparent) 0%, transparent 60%)",
           filter: "blur(100px)",
-          animation: "drift 35s ease-in-out 20s infinite",
+          animation: "drift-wide 40s ease-in-out 15s infinite",
+          opacity: 0.5,
         }}
       />
     </div>

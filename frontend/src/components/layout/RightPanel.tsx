@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import MoonIcon from "../shared/MoonIcon";
 
 const easeOut = [0.25, 0.1, 0.25, 1] as const;
 
@@ -20,30 +21,40 @@ export default function RightPanel() {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.8, ease: easeOut, delay: 0.3 }}
-      className="w-[260px] shrink-0 flex flex-col h-full relative overflow-hidden"
+      className="w-[280px] shrink-0 flex flex-col h-full relative overflow-hidden"
     >
-      <div className="absolute inset-0 bg-void-900/70" />
+      {/* Deep background — 使用 CSS 变量跟随日夜切换 */}
+      <div
+        className="absolute inset-0 transition-[background] duration-[1.8s]"
+        style={{ background: "var(--bg-mid)" }}
+      />
       <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-white/[0.04] to-transparent" />
 
       <div className="relative z-10 flex flex-col h-full px-5 py-7 overflow-y-auto">
-        <motion.div className="space-y-6" variants={stagger} initial="initial" animate="animate">
-          {/* Today's mood */}
-          <motion.section variants={itemAnim} className="glass rounded-2xl p-4 card-texture">
-            <p className="text-[11px] uppercase tracking-widest text-slate-500 mb-3">今日心情</p>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-2xl animate-breathe">
-                🌙
+        <motion.div className="space-y-5" variants={stagger} initial="initial" animate="animate">
+          {/* Today's mood — 呼吸月亮 */}
+          <motion.section variants={itemAnim} className="glass-surface p-5">
+            <p className="text-[11px] uppercase tracking-widest mb-4" style={{ color: "var(--text-tertiary)" }}>
+              今日心情
+            </p>
+            <div className="flex items-center gap-4">
+              <div className="breathing-presence w-14 h-14 flex items-center justify-center">
+                <MoonIcon size={22} glowing />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-200">平静</p>
-                <p className="text-xs text-slate-500 mt-0.5">比昨天更放松</p>
+                <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>平静</p>
+                <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
+                  比昨天更放松
+                </p>
               </div>
             </div>
           </motion.section>
 
-          {/* Mood trend */}
-          <motion.section variants={itemAnim} className="glass rounded-2xl p-4 card-texture">
-            <p className="text-[11px] uppercase tracking-widest text-slate-500 mb-3">近期情绪</p>
+          {/* Mood trend — 月光渐变色柱 */}
+          <motion.section variants={itemAnim} className="glass-surface p-5">
+            <p className="text-[11px] uppercase tracking-widest mb-4" style={{ color: "var(--text-tertiary)" }}>
+              近期情绪
+            </p>
             <div className="flex items-end gap-1.5 h-16">
               {[0.3, 0.5, 0.2, 0.7, 0.4, 0.6, 0.8].map((v, i) => (
                 <motion.div
@@ -51,41 +62,67 @@ export default function RightPanel() {
                   initial={{ scaleY: 0 }}
                   animate={{ scaleY: 1 }}
                   transition={{ delay: 0.8 + i * 0.08, duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
-                  className="flex-1 rounded-full bg-gradient-to-t from-moon-500/40 to-lavender-400/40 origin-bottom"
-                  style={{ height: `${v * 100}%` }}
+                  className="flex-1 rounded-full origin-bottom"
+                  style={{
+                    height: `${v * 100}%`,
+                    background: "linear-gradient(to top, var(--accent-500), var(--accent-300))",
+                    opacity: 0.5 + v * 0.5,
+                  }}
                 />
               ))}
             </div>
           </motion.section>
 
           {/* Daily quote */}
-          <motion.section variants={itemAnim} className="glass rounded-2xl p-4 card-texture">
-            <p className="text-[11px] uppercase tracking-widest text-slate-500 mb-3">每日语录</p>
-            <p className="text-sm text-slate-300 leading-relaxed font-serif italic">
+          <motion.section variants={itemAnim} className="glass-surface p-5">
+            <p className="text-[11px] uppercase tracking-widest mb-4" style={{ color: "var(--text-tertiary)" }}>
+              每日语录
+            </p>
+            <p
+              className="text-sm leading-relaxed font-serif italic"
+              style={{ color: "var(--text-primary)" }}
+            >
               "你不需要总是坚强，偶尔柔软也是一种力量。"
             </p>
           </motion.section>
 
-          {/* Quick actions — real links */}
-          <motion.section variants={itemAnim} className="glass rounded-2xl p-4 card-texture">
-            <p className="text-[11px] uppercase tracking-widest text-slate-500 mb-3">快捷入口</p>
-            <div className="space-y-1.5">
+          {/* Quick actions — 情绪入口 */}
+          <motion.section variants={itemAnim} className="glass-surface p-5">
+            <p className="text-[11px] uppercase tracking-widest mb-4" style={{ color: "var(--text-tertiary)" }}>
+              情绪入口
+            </p>
+            <div className="space-y-1">
               {[
-                { label: "开始倾诉", to: "/chat", emoji: "💭" },
-                { label: "ECHO 答案之书", to: "/echo", emoji: "📖" },
-                { label: "深夜小智", to: "/night", emoji: "🌙" },
-                { label: "情绪日记", to: "/mood", emoji: "📝" },
-                { label: "心理测评", to: "/assessment", emoji: "🧩" },
+                { label: "开始倾诉", to: "/chat" },
+                { label: "ECHO 答案之书", to: "/echo" },
+                { label: "深夜陪伴", to: "/night" },
+                { label: "情绪日记", to: "/mood" },
+                { label: "自我了解", to: "/assessment" },
               ].map((action) => (
                 <motion.button
                   key={action.to}
-                  whileHover={{ x: 4, backgroundColor: "rgba(255,255,255,0.04)" }}
+                  whileHover={{ x: 4 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => navigate(action.to)}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-slate-400
-                             hover:text-slate-200 transition-colors duration-300 text-left"
+                  className="nav-item-hover w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-left transition-colors duration-300"
+                  style={{
+                    color: "var(--text-secondary)",
+                    background: "transparent",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = "var(--text-primary)";
+                    e.currentTarget.style.background = "var(--bg-glass)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = "var(--text-secondary)";
+                    e.currentTarget.style.background = "transparent";
+                  }}
                 >
-                  <span className="text-base">{action.emoji}</span>
+                  {/* 纯 CSS dot 装饰 */}
+                  <span
+                    className="w-1.5 h-1.5 rounded-full shrink-0"
+                    style={{ background: "var(--accent-400)", opacity: 0.5 }}
+                  />
                   <span>{action.label}</span>
                 </motion.button>
               ))}
@@ -93,16 +130,20 @@ export default function RightPanel() {
           </motion.section>
 
           {/* AI companion status */}
-          <motion.section variants={itemAnim} className="glass rounded-2xl p-4 card-texture">
-            <p className="text-[11px] uppercase tracking-widest text-slate-500 mb-3">AI 陪伴状态</p>
+          <motion.section variants={itemAnim} className="glass-surface p-5">
+            <p className="text-[11px] uppercase tracking-widest mb-4" style={{ color: "var(--text-tertiary)" }}>
+              AI 陪伴状态
+            </p>
             <div className="flex items-center gap-3">
               <div className="relative">
                 <div className="w-2.5 h-2.5 rounded-full bg-success-500" />
                 <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-success-500 animate-ping opacity-30" />
               </div>
               <div>
-                <p className="text-sm text-slate-300">在线陪伴中</p>
-                <p className="text-xs text-slate-600 mt-0.5">随时可以倾听</p>
+                <p className="text-sm" style={{ color: "var(--text-primary)" }}>在线陪伴中</p>
+                <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
+                  随时可以倾听
+                </p>
               </div>
             </div>
           </motion.section>

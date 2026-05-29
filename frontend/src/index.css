@@ -2,119 +2,357 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ================================================================
+   「观心」全站视觉基调 — 零贴图，纯 CSS gradient + shadow + blur
+   日间 / 深夜 双模式通过 CSS Variables (.night-theme) 切换
+   ================================================================ */
+
 @layer base {
   * {
     box-sizing: border-box;
   }
 
   html {
-    @apply bg-void-950 text-slate-200 antialiased;
+    @apply antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    /* 主题渐变过渡 — 所有颜色属性平滑切换 */
+    transition: var(--transition-theme);
   }
 
   body {
     @apply min-h-screen;
-    /* Subtle noise texture overlay to avoid dead-black screen feel */
+    color: var(--text-primary);
+
+    /* ── 日间背景（默认） ──
+       暖灰绿底 + 顶部柔光 + 远处暖色 + 极细噪点 */
     background:
-      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(200, 180, 220, 0.08) 0%, transparent 60%),
-      /* moonlight overhead */
-      radial-gradient(ellipse 40% 30% at 85% 20%, rgba(201, 141, 50, 0.04) 0%, transparent 50%),
-      /* warm accent glow */
-      radial-gradient(ellipse 30% 20% at 15% 80%, rgba(154, 128, 224, 0.03) 0%, transparent 50%),
-      /* lavender deep glow */
-      url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+      /* 顶部暖白光 — 模拟日光从上方洒落 */
+      radial-gradient(ellipse 70% 50% at 50% -5%, rgba(134, 239, 172, 0.06) 0%, transparent 60%),
+      /* 右上暖金 accent */
+      radial-gradient(ellipse 35% 25% at 80% 15%, rgba(251, 191, 36, 0.04) 0%, transparent 50%),
+      /* 左下冷绿深度 */
+      radial-gradient(ellipse 30% 20% at 20% 75%, rgba(74, 222, 128, 0.03) 0%, transparent 50%),
+      /* 极细噪点纹理 — CSS repeating gradient + 超低 opacity */
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.008) 2px,
+        rgba(0, 0, 0, 0.008) 3px
+      ),
+      var(--bg-deep);
   }
 
-  /* Scrollbar — thin, subtle, matching the theme */
-  ::-webkit-scrollbar {
-    width: 4px;
+  /* ── 深夜模式背景覆盖 ── */
+  .night-theme body,
+  body:has(.night-theme) {
+    background:
+      /* 顶部月光冷紫 orb */
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(139, 92, 246, 0.08) 0%, transparent 60%),
+      /* 左上星空冷蓝 */
+      radial-gradient(ellipse 40% 30% at 20% 20%, rgba(125, 211, 252, 0.04) 0%, transparent 50%),
+      /* 右下深紫暗影 */
+      radial-gradient(ellipse 30% 25% at 75% 80%, rgba(139, 92, 246, 0.03) 0%, transparent 50%),
+      /* 极细噪点 */
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(255, 255, 255, 0.006) 2px,
+        rgba(255, 255, 255, 0.006) 3px
+      ),
+      var(--bg-deep);
   }
-  ::-webkit-scrollbar-track {
-    background: transparent;
+
+  /* ── 选中文字 ── */
+  ::selection {
+    background: color-mix(in srgb, var(--accent-400) 25%, transparent);
+    color: var(--text-primary);
   }
+
+  /* ── 滚动条 — 纤细，与主题融合 ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.06);
+    background: color-mix(in srgb, var(--text-tertiary) 20%, transparent);
     border-radius: 999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: color-mix(in srgb, var(--text-tertiary) 35%, transparent);
   }
 }
 
+/* ================================================================
+   @layer components — Tailwind 兼容 + 纯 CSS 组件
+   ================================================================ */
+
 @layer components {
-  /* ── Frosted glass surfaces (3 tiers) ── */
+  /* ── 玻璃拟态 (Tailwind 快捷方式 → 引用 theme.css token) ── */
   .glass-light {
-    @apply bg-white/[0.03] border border-white/[0.06] backdrop-blur-xs;
-    box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.03),
-      0 4px 24px -8px rgba(0, 0, 0, 0.3);
-  }
-  .glass {
-    @apply bg-white/[0.04] border border-white/[0.07] backdrop-blur-glass;
+    @apply border rounded-2xl;
+    background: var(--bg-glass);
+    backdrop-filter: blur(12px) saturate(1.1);
+    -webkit-backdrop-filter: blur(12px) saturate(1.1);
+    border-color: var(--border-light);
     box-shadow:
       inset 0 1px 0 0 rgba(255, 255, 255, 0.04),
-      0 8px 32px -12px rgba(0, 0, 0, 0.4);
+      0 2px 16px -6px rgba(0, 0, 0, 0.08);
   }
+
+  .glass {
+    @apply border rounded-2xl;
+    background: var(--bg-card);
+    backdrop-filter: blur(24px) saturate(1.2);
+    -webkit-backdrop-filter: blur(24px) saturate(1.2);
+    border-color: var(--card-border);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
+      0 8px 32px -12px rgba(0, 0, 0, 0.12);
+  }
+
   .glass-heavy {
-    @apply bg-white/[0.06] border border-white/[0.08] backdrop-blur-glass-heavy;
+    @apply border rounded-2xl;
+    background: var(--bg-card);
+    backdrop-filter: blur(40px) saturate(1.4);
+    -webkit-backdrop-filter: blur(40px) saturate(1.4);
+    border-color: var(--card-border);
+    border-width: 1.5px;
     box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
-      0 12px 48px -16px rgba(0, 0, 0, 0.5);
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+      0 12px 48px -16px rgba(0, 0, 0, 0.2);
   }
 
-  /* ── Card wrapper (rounding + spacing over glass) ── */
+  /* ── 卡片包装 (glass + 圆角) ── */
   .glass-card {
-    @apply rounded-2xl bg-white/[0.04] border border-white/[0.06] backdrop-blur-glass;
+    @apply rounded-2xl border;
+    background: var(--bg-card);
+    backdrop-filter: blur(24px) saturate(1.2);
+    -webkit-backdrop-filter: blur(24px) saturate(1.2);
+    border-color: var(--card-border);
     box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.03),
-      0 6px 20px -8px rgba(0, 0, 0, 0.35);
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.04),
+      0 6px 20px -8px rgba(0, 0, 0, 0.15);
   }
 
-  /* ── Glow button (capsule) ── */
+  /* ── 发光按钮 (胶囊) - 旧版 btn-glow 升级 ── */
   .btn-glow {
     @apply relative overflow-hidden rounded-full px-8 py-3 font-medium text-sm
-           bg-gradient-to-br from-moon-400/90 to-moon-500/90 text-void-900
-           shadow-glow-md transition-all duration-500;
+           transition-all duration-500;
+    color: var(--text-inverse);
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--accent-400) 75%, black),
+      color-mix(in srgb, var(--accent-500) 80%, black)
+    );
+    border: 1px solid color-mix(in srgb, var(--accent-400) 30%, transparent);
+    box-shadow: var(--glow-accent);
   }
   .btn-glow::after {
     content: "";
     @apply absolute inset-0 rounded-full opacity-0 transition-opacity duration-500;
     background: linear-gradient(
-      110deg,
+      105deg,
       transparent 30%,
-      rgba(255, 255, 255, 0.3) 50%,
+      rgba(255, 255, 255, 0.25) 50%,
       transparent 70%
     );
     background-size: 200% 100%;
   }
   .btn-glow:hover::after {
     @apply opacity-100;
-    animation: shimmer 1.5s linear infinite;
+    animation: shimmer-sweep 1.8s linear infinite;
   }
   .btn-glow:hover {
-    @apply shadow-glow-lg scale-[1.03];
+    box-shadow: var(--glow-accent-strong);
+    transform: scale(1.03);
   }
-  .btn-glow:active {
-    @apply scale-[0.98];
-  }
+  .btn-glow:active { transform: scale(0.98); }
 
-  /* ── Gradient border ring (for focused elements) ── */
+  /* ── Gradient border ring (focus) ── */
   .ring-glow {
     @apply outline-none;
     box-shadow:
-      0 0 0 1px rgba(201, 141, 50, 0.3),
-      0 0 20px -5px rgba(201, 141, 50, 0.2),
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.03);
+      0 0 0 1px color-mix(in srgb, var(--accent-400) 35%, transparent),
+      0 0 20px -5px color-mix(in srgb, var(--accent-400) 22%, transparent),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
   }
 
-  /* ── Texture overlay for cards ── */
+  /* ── 微纹路 overlay (保留向后兼容) ── */
   .card-texture {
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    position: relative;
+  }
+  .card-texture::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(255, 255, 255, 0.008) 3px,
+        rgba(255, 255, 255, 0.008) 4px
+      );
+    opacity: 0.5;
+  }
+
+  /* ── 快捷建议 chips ── */
+  .suggestion-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 18px;
+    border-radius: 999px;
+    background: var(--bg-glass);
+    border: 0.5px solid var(--border-light);
+    color: var(--text-secondary);
+    font-size: 13px;
+    cursor: pointer;
+    transition: var(--transition-surface);
+  }
+  .suggestion-chip:hover {
+    background: var(--bg-card);
+    border-color: var(--card-border-hover);
+    color: var(--text-primary);
+    transform: translateY(-1px);
   }
 }
+
+/* ================================================================
+   @layer utilities
+   ================================================================ */
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+/* ================================================================
+   全局氛围元素（不在 Tailwind layer 中，避免 @apply 限制）
+   ================================================================ */
+
+/* ── 星空 dots grid (ECHO / 深夜页面背景) ── */
+.starfield-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ── 深空 orb 光球 ── */
+.deep-space-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(80px);
+}
+.deep-space-orb-moon {
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent-400) 18%, transparent) 0%,
+    color-mix(in srgb, var(--accent-400) 6%, transparent) 40%,
+    transparent 70%
+  );
+  animation: drift-wide 30s ease-in-out infinite;
+}
+.deep-space-orb-warm {
+  background: radial-gradient(
+    circle,
+    var(--particle-color-warm) 0%,
+    transparent 65%
+  );
+  animation: drift-wide 35s ease-in-out 8s infinite;
+}
+
+/* ── 玻璃瓶 (CSS shape — Hero 区) ── */
+.glass-jar {
+  width: 72px;
+  height: 92px;
+  border-radius: 36% 36% 28% 28% / 45% 45% 25% 25%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow:
+    inset 0 0 24px rgba(255, 255, 255, 0.06),
+    0 4px 16px -8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+/* 瓶口高光 */
+.glass-jar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 15%;
+  width: 70%;
+  height: 18%;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* ── CSS 心形 (::before + ::after 旋转) ── */
+.css-heart {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  animation: float-gentle 4s ease-in-out infinite;
+}
+.css-heart::before,
+.css-heart::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 13px;
+  border-radius: 8px 8px 0 0;
+  background: rgba(251, 191, 36, 0.5);
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.2);
+}
+.css-heart::before {
+  left: 5px;
+  transform: rotate(-45deg);
+  transform-origin: 0 100%;
+}
+.css-heart::after {
+  left: 3px;
+  transform: rotate(45deg);
+  transform-origin: 100% 100%;
+}
+
+/* ── 夜晚植物剪影 (CSS clip-path) ── */
+.night-plant {
+  position: absolute;
+  bottom: 0;
+  width: 60px;
+  height: 80px;
+  background: rgba(0, 0, 0, 0.15);
+  filter: blur(2px);
+  clip-path: ellipse(45% 60% at 30% 70%);
+}
+
+/* ── 标题衬线字体增强 ── */
+.font-display {
+  font-family: 'Noto Serif SC', 'ZCOOL XiaoWei', Georgia, serif;
+  letter-spacing: 0.02em;
+}
+
+/* ── 渐入动画延迟工具 ── */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+/* ── 确保动画只在进入视口后播放 (减少首屏开销) ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
