@@ -163,15 +163,25 @@ export default function EchoPage() {
           transition={{ duration: 0.8, ease: easeOut }}
           className="text-center mb-10"
         >
-          {/* CSS 月亮装饰 */}
-          <motion.div
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="mx-auto mb-5"
-            style={{ color: "var(--accent-400)" }}
-          >
-            <EchoHeroIcon size={56} />
-          </motion.div>
+          {/* ECHO 主图标 — 精装书本 */}
+          <div className="flex justify-center mb-5">
+            <motion.div
+              animate={{ opacity: [0.6, 1, 0.6] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="relative"
+              style={{ color: "var(--accent-400)" }}
+            >
+              {/* 光晕背景 */}
+              <div className="absolute inset-0 rounded-full"
+                style={{
+                  background: "radial-gradient(circle, color-mix(in srgb, var(--accent-400) 10%, transparent) 0%, transparent 70%)",
+                  filter: "blur(16px)",
+                  transform: "scale(1.8)",
+                }}
+              />
+              <EchoHeroIcon size={64} />
+            </motion.div>
+          </div>
           <h1 className="font-serif text-3xl font-semibold tracking-tight" style={{ color: "var(--text-primary)" }}>
             ECHO 答案之书
           </h1>

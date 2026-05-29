@@ -146,28 +146,70 @@ export function AIPresenceIcon({ size = 48 }: { size?: number }) {
   );
 }
 
-/* ── ECHO 主视觉图标 — 翻开的书 + 星光 + 宇宙环 ── */
-export function EchoHeroIcon({ size = 48 }: { size?: number }) {
+/* ── ECHO 主视觉图标 — 精装书本 + 外层光感 + 星光 ── */
+export function EchoHeroIcon({ size = 56 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-      {/* 外环 — 宇宙轨迹 */}
-      <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="0.6" opacity="0.2"
-        strokeDasharray="3 5" />
-      <circle cx="32" cy="32" r="24" stroke="currentColor" strokeWidth="0.4" opacity="0.12" />
-      {/* 左书页 */}
-      <path d="M32 12v28M14 20v18a2 2 0 002 2h16V12H16a2 2 0 00-2 2z"
-        fill="currentColor" fillOpacity="0.08" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
-      {/* 右书页 */}
-      <path d="M32 12v28h16a2 2 0 002-2V20a2 2 0 00-2-2H32z"
-        fill="currentColor" fillOpacity="0.04" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
-      {/* 书脊星光 */}
-      <path d="M32 18l1.5 3.2 3.5.5-2.5 2.4.6 3.4-3.1-1.6-3.1 1.6.6-3.4-2.5-2.4 3.5-.5L32 18z"
-        fill="currentColor" opacity="0.45" />
-      {/* 右上伴星 */}
-      <circle cx="46" cy="16" r="1.5" fill="currentColor" opacity="0.3" />
-      <circle cx="50" cy="20" r="1" fill="currentColor" opacity="0.2" />
-      {/* 左下伴星 */}
-      <circle cx="18" cy="46" r="1.2" fill="currentColor" opacity="0.25" />
+    <svg width={size} height={size} viewBox="0 0 72 72" fill="none">
+      <defs>
+        {/* 外层柔光渐变 */}
+        <radialGradient id="echo-outer-glow" cx="50%" cy="45%" r="50%">
+          <stop offset="0%" stopColor="currentColor" stopOpacity="0.12" />
+          <stop offset="60%" stopColor="currentColor" stopOpacity="0.04" />
+          <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+        </radialGradient>
+        {/* 书页渐变 */}
+        <linearGradient id="echo-page-left" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="currentColor" stopOpacity="0.06" />
+          <stop offset="100%" stopColor="currentColor" stopOpacity="0.02" />
+        </linearGradient>
+        <linearGradient id="echo-page-right" x1="1" y1="0" x2="0" y2="0">
+          <stop offset="0%" stopColor="currentColor" stopOpacity="0.08" />
+          <stop offset="100%" stopColor="currentColor" stopOpacity="0.03" />
+        </linearGradient>
+      </defs>
+
+      {/* 外层光晕 — 大柔光环 */}
+      <circle cx="36" cy="35" r="32" fill="url(#echo-outer-glow)" />
+
+      {/* 装饰轨道 — 细环 */}
+      <circle cx="36" cy="35" r="30" stroke="currentColor" strokeWidth="0.4" opacity="0.12" />
+      <circle cx="36" cy="35" r="26" stroke="currentColor" strokeWidth="0.3" opacity="0.08"
+        strokeDasharray="2 6" />
+
+      {/* ── 书本主体 ── */}
+      <g transform="translate(7, 6)">
+        {/* 书脊阴影 */}
+        <line x1="29" y1="8" x2="29" y2="52" stroke="currentColor" strokeWidth="2.5" opacity="0.25" strokeLinecap="round" />
+
+        {/* 左封面 */}
+        <path d="M29 8v44M5 16v34a2 2 0 002 2h22V8H7a2 2 0 00-2 2z"
+          fill="url(#echo-page-left)" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+
+        {/* 右封面 */}
+        <path d="M29 8v44h22a2 2 0 002-2V16a2 2 0 00-2-2H29z"
+          fill="url(#echo-page-right)" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+
+        {/* 左页内文 — 横线代表文字 */}
+        {[20, 24, 28, 32, 36, 40, 44].map((y, i) => (
+          <line key={`l${i}`} x1="11" y1={y} x2="25" y2={y}
+            stroke="currentColor" strokeWidth="0.7" opacity={0.12 - i * 0.012} strokeLinecap="round" />
+        ))}
+
+        {/* 右页内文 */}
+        {[20, 24, 28, 32, 36, 40, 44].map((y, i) => (
+          <line key={`r${i}`} x1="33" y1={y} x2="47" y2={y}
+            stroke="currentColor" strokeWidth="0.7" opacity={0.12 - i * 0.012} strokeLinecap="round" />
+        ))}
+
+        {/* 书脊中心星 */}
+        <path d="M29 26l1.3 2.8 3 .4-2.2 2 .5 3-2.6-1.4-2.6 1.4.5-3-2.2-2 3-.4L29 26z"
+          fill="currentColor" opacity="0.55" />
+      </g>
+
+      {/* 书本上方微光粒子 */}
+      <circle cx="36" cy="8" r="1.2" fill="currentColor" opacity="0.25" />
+      <circle cx="44" cy="10" r="0.8" fill="currentColor" opacity="0.18" />
+      <circle cx="28" cy="9" r="0.9" fill="currentColor" opacity="0.2" />
     </svg>
   );
 }
