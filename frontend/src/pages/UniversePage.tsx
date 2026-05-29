@@ -16,7 +16,7 @@ export default function UniversePage() {
   const selectedPlanet = planets.find((p) => p.id === selectedPlanetId);
 
   return (
-    <div className="relative h-full w-full overflow-hidden">
+    <div className="fixed inset-0 z-0" style={{ top: 0, left: 0, right: 0, bottom: 0 }}>
       {/* 3D 场景 */}
       <UniverseCanvas />
 

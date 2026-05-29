@@ -5,7 +5,6 @@ import type { PlanetData } from "../../types/universe";
 import { useUniverseStore } from "../../stores/useUniverseStore";
 import { generatePlanetTexture } from "./planetTexture";
 
-/** 纹理缓存 — 避免重复生成 */
 const texCache = new Map<string, THREE.CanvasTexture>();
 
 function getTexture(type: string, seed: number): THREE.CanvasTexture {
@@ -18,7 +17,6 @@ function getTexture(type: string, seed: number): THREE.CanvasTexture {
   return tex;
 }
 
-/** 单颗情绪星球 — 真实纹理 + 大气层 + 公转自转 */
 export default function EmotionPlanet({ planet }: { planet: PlanetData }) {
   const groupRef = useRef<THREE.Group>(null);
   const meshRef = useRef<THREE.Mesh>(null);
@@ -27,20 +25,18 @@ export default function EmotionPlanet({ planet }: { planet: PlanetData }) {
   const updateAngle = useUniverseStore((s) => s.updatePlanetAngle);
   const isSelected = selectedId === planet.id;
 
-  const seed = useMemo(() => planet.id.charCodeAt(0) + planet.id.charCodeAt(1) * 31, [planet.id]);
+  const seed = useMemo(() => planet.id.charCodeAt(0) * 31 + planet.id.charCodeAt(1), [planet.id]);
   const map = useMemo(() => getTexture(planet.type, seed), [planet.type, seed]);
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
-    // 公转
     const newAngle = planet.angle + planet.orbitSpeed * delta;
     updateAngle(planet.id, newAngle);
     groupRef.current.position.set(
       Math.cos(newAngle) * planet.orbitRadius,
-      Math.sin(newAngle * 2) * planet.tilt * planet.orbitRadius,
+      Math.sin(newAngle * 2.5) * planet.tilt * planet.orbitRadius,
       Math.sin(newAngle) * planet.orbitRadius
     );
-    // 自转
     if (meshRef.current) {
       meshRef.current.rotation.y += delta * planet.rotationSpeed;
     }
@@ -48,48 +44,13 @@ export default function EmotionPlanet({ planet }: { planet: PlanetData }) {
 
   return (
     <group ref={groupRef}>
-      {/* 外大气光晕 — 半透明球壳 */}
-      <mesh scale={[1.45, 1.45, 1.45]}>
-        <sphereGeometry args={[planet.size, 32, 32]} />
-        <shaderMaterial
-          transparent
-          depthWrite={false}
-          blending={THREE.AdditiveBlending}
-          uniforms={{
-            uColor: { value: new THREE.Color(planet.color) },
-            uOpacity: { value: planet.glowIntensity * 0.12 },
-          }}
-          vertexShader={`
-            varying vec3 vNormal;
-            varying vec3 vPosition;
-            void main() {
-              vec4 worldPos = modelMatrix * vec4(position, 1.0);
-              vPosition = worldPos.xyz;
-              vNormal = normalize(mat3(modelMatrix) * normal);
-              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-            }
-          `}
-          fragmentShader={`
-            varying vec3 vNormal;
-            varying vec3 vPosition;
-            uniform vec3 uColor;
-            uniform float uOpacity;
-            void main() {
-              vec3 viewDir = normalize(cameraPosition - vPosition);
-              float fresnel = pow(1.0 - abs(dot(vNormal, viewDir)), 3.5);
-              gl_FragColor = vec4(uColor, fresnel * uOpacity);
-            }
-          `}
-        />
-      </mesh>
-
-      {/* 内光晕 */}
-      <mesh scale={[1.18, 1.18, 1.18]}>
-        <sphereGeometry args={[planet.size, 32, 32]} />
+      {/* 大气光晕 — 简单半透明壳 */}
+      <mesh scale={[1.4, 1.4, 1.4]}>
+        <sphereGeometry args={[planet.size, 16, 16]} />
         <meshBasicMaterial
           color={planet.color}
           transparent
-          opacity={0.04}
+          opacity={planet.glowIntensity * 0.08}
           depthWrite={false}
         />
       </mesh>
@@ -101,18 +62,20 @@ export default function EmotionPlanet({ planet }: { planet: PlanetData }) {
         onPointerOver={() => { document.body.style.cursor = "pointer"; }}
         onPointerOut={() => { document.body.style.cursor = "auto"; }}
       >
-        <sphereGeometry args={[planet.size, 64, 64]} />
+        <sphereGeometry args={[planet.size, 48, 48]} />
         <meshStandardMaterial
           map={map}
-          roughness={0.75}
+          roughness={0.7}
           metalness={0.05}
+          emissive={new THREE.Color(planet.color)}
+          emissiveIntensity={isSelected ? 0.3 : planet.glowIntensity * 0.15}
         />
       </mesh>
 
-      {/* 选中指示环 */}
+      {/* 选中环 */}
       {isSelected && (
         <mesh rotation={[Math.PI / 2.2, 0.3, 0]}>
-          <torusGeometry args={[planet.size * 1.55, 0.03, 16, 48]} />
+          <torusGeometry args={[planet.size * 1.5, 0.03, 16, 48]} />
           <meshBasicMaterial color="#ffffff" transparent opacity={0.6} depthWrite={false} />
         </mesh>
       )}
