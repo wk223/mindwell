@@ -5,6 +5,7 @@ import App from "./App";
 import ErrorBoundary from "./components/shared/ErrorBoundary";
 import ParticleField from "./components/atmosphere/ParticleField";
 import "./index.css";
+import "./styles/theme.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
