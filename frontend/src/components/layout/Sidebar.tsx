@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../../utils/cn";
 import { useDialogueStore } from "../../stores/useDialogueStore";
 import MoonIcon from "../shared/MoonIcon";
+import { HomeIcon, ChatIcon, EchoIcon, MoodIcon, AssessmentIcon, NightIcon } from "../shared/NavIcons";
 
 const easeOut = [0.25, 0.1, 0.25, 1] as const;
 
@@ -13,12 +14,12 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { to: "/home", label: "首页" },
-  { to: "/chat", label: "倾诉" },
-  { to: "/echo", label: "答案之书" },
-  { to: "/mood", label: "情绪日记" },
-  { to: "/assessment", label: "自我了解" },
-  { to: "/night", label: "深夜陪伴" },
+  { to: "/home", label: "首页", icon: HomeIcon },
+  { to: "/chat", label: "倾诉", icon: ChatIcon },
+  { to: "/echo", label: "答案之书", icon: EchoIcon },
+  { to: "/mood", label: "情绪日记", icon: MoodIcon },
+  { to: "/assessment", label: "自我了解", icon: AssessmentIcon },
+  { to: "/night", label: "深夜陪伴", icon: NightIcon },
 ];
 
 const stagger = {
@@ -222,15 +223,14 @@ export default function Sidebar({ userNickname, onLogout }: SidebarProps) {
                     : { color: "var(--text-secondary)", background: "transparent" }
                 }
               >
-                {/* CSS dot indicator */}
-                <span
-                  className="w-1.5 h-1.5 rounded-full shrink-0 transition-all duration-300"
-                  style={{
-                    background: "var(--accent-400)",
-                    opacity: 0.5,
-                  }}
-                />
-                <span>{item.label}</span>
+                {({ isActive }) => (
+                  <>
+                    <span className="shrink-0 transition-all duration-300" style={{ opacity: isActive ? 1 : 0.45 }}>
+                      <item.icon size={20} active={isActive} />
+                    </span>
+                    <span>{item.label}</span>
+                  </>
+                )}
               </NavLink>
             </motion.div>
           ))}

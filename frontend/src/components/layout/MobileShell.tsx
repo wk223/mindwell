@@ -1,13 +1,14 @@
 import { NavLink } from "react-router-dom";
 import { useAuthStore } from "../../stores/useAuthStore";
 import { cn } from "../../utils/cn";
+import { HomeIcon, ChatIcon, MoodIcon, AssessmentIcon, NightIcon } from "../shared/NavIcons";
 
 const tabs = [
-  { to: "/home", label: "首页", icon: HomeTabIcon },
-  { to: "/chat", label: "倾诉", icon: ChatTabIcon },
-  { to: "/mood", label: "心情", icon: MoodTabIcon },
-  { to: "/assessment", label: "了解", icon: AssessmentTabIcon },
-  { to: "/night", label: "陪伴", icon: NightTabIcon },
+  { to: "/home", label: "首页", icon: HomeIcon },
+  { to: "/chat", label: "倾诉", icon: ChatIcon },
+  { to: "/mood", label: "心情", icon: MoodIcon },
+  { to: "/assessment", label: "了解", icon: AssessmentIcon },
+  { to: "/night", label: "陪伴", icon: NightIcon },
 ];
 
 export default function MobileShell({ children }: { children: React.ReactNode }) {
@@ -82,7 +83,7 @@ export default function MobileShell({ children }: { children: React.ReactNode })
           >
             {({ isActive }) => (
               <>
-                {tab.icon(isActive)}
+                <tab.icon size={20} active={isActive} />
                 <span>{tab.label}</span>
               </>
             )}
@@ -90,47 +91,5 @@ export default function MobileShell({ children }: { children: React.ReactNode })
         ))}
       </nav>
     </div>
-  );
-}
-
-function HomeTabIcon(a: boolean) {
-  return (
-    <svg className="w-5 h-5" fill={a ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={a ? 0 : 1.5}
-        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-    </svg>
-  );
-}
-
-function ChatTabIcon(a: boolean) {
-  return (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-    </svg>
-  );
-}
-function MoodTabIcon(a: boolean) {
-  return (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-        d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  );
-}
-function NightTabIcon(a: boolean) {
-  return (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-        d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-    </svg>
-  );
-}
-function AssessmentTabIcon(a: boolean) {
-  return (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-    </svg>
   );
 }
