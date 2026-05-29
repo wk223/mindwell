@@ -11,6 +11,7 @@ import CommunityPage from "./pages/CommunityPage";
 import GrowthPage from "./pages/GrowthPage";
 import LateNightPage from "./pages/LateNightPage";
 import MemoryPage from "./pages/MemoryPage";
+import UniversePage from "./pages/UniversePage";
 import AppShell from "./components/layout/AppShell";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -40,6 +41,7 @@ export default function AppRouter() {
       <Route path="/growth" element={<PrivateRoute><AppShell><GrowthPage /></AppShell></PrivateRoute>} />
       <Route path="/night" element={<PrivateRoute><AppShell><LateNightPage /></AppShell></PrivateRoute>} />
       <Route path="/memories" element={<PrivateRoute><AppShell><MemoryPage /></AppShell></PrivateRoute>} />
+      <Route path="/universe" element={<PrivateRoute><AppShell><UniversePage /></AppShell></PrivateRoute>} />
     </Routes>
   );
 }

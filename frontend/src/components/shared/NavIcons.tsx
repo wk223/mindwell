@@ -107,6 +107,24 @@ export function NightIcon({ size = 20, active }: IconProps) {
   );
 }
 
+/* ── 情绪星图 — 轨道 + 星 ── */
+export function UniverseIcon({ size = 20, active }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      {/* 椭圆轨道 */}
+      <ellipse cx="12" cy="12" rx="9" ry="4" stroke="currentColor" strokeWidth={1.2}
+        strokeDasharray="2 2" opacity={active ? 0.5 : 0.25}
+        transform="rotate(-20 12 12)" />
+      {/* 中心星 */}
+      <circle cx="12" cy="12" r="2.5" fill={active ? "currentColor" : "none"}
+        stroke="currentColor" strokeWidth={1.3} opacity={active ? 0.5 : 0.4} />
+      {/* 轨道上的星球 */}
+      <circle cx="5" cy="9" r="1.5" fill="currentColor" opacity={active ? 0.6 : 0.3} />
+      <circle cx="19" cy="13" r="1" fill="currentColor" opacity={active ? 0.4 : 0.2} />
+    </svg>
+  );
+}
+
 /* ── 豆包感 AI 陪伴图标 — 柔软云朵 + 暖光 ── */
 export function AIPresenceIcon({ size = 48 }: { size?: number }) {
   return (

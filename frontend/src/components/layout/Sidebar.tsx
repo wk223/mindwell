@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../../utils/cn";
 import { useDialogueStore } from "../../stores/useDialogueStore";
 import MoonIcon from "../shared/MoonIcon";
-import { HomeIcon, ChatIcon, EchoIcon, MoodIcon, AssessmentIcon, NightIcon } from "../shared/NavIcons";
+import { HomeIcon, ChatIcon, EchoIcon, MoodIcon, AssessmentIcon, NightIcon, UniverseIcon } from "../shared/NavIcons";
 
 const easeOut = [0.25, 0.1, 0.25, 1] as const;
 
@@ -20,6 +20,7 @@ const navItems = [
   { to: "/mood", label: "情绪日记", icon: MoodIcon },
   { to: "/assessment", label: "自我了解", icon: AssessmentIcon },
   { to: "/night", label: "深夜陪伴", icon: NightIcon },
+  { to: "/universe", label: "情绪星图", icon: UniverseIcon },
 ];
 
 const stagger = {
