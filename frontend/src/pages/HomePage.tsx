@@ -201,19 +201,45 @@ export default function HomePage() {
             />
 
             {/* ── 玻璃瓶 (CSS shape) ── */}
+            {/* ── 玻璃瓶 — 满瓶星光 ── */}
             <div className="absolute bottom-4 left-6">
               <div className="glass-jar">
-                {/* 瓶内光芒 */}
+                {/* 瓶底柔光 */}
                 <div
-                  className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-10 rounded-full"
+                  className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-12 rounded-full"
                   style={{
                     background:
-                      "radial-gradient(ellipse at center, rgba(251,191,36,0.2) 0%, transparent 70%)",
+                      "radial-gradient(ellipse at center, rgba(251,191,36,0.15) 0%, rgba(200,180,220,0.08) 40%, transparent 70%)",
                     animation: "moonlight-breathe 4s ease-in-out infinite",
                   }}
                 />
-                {/* CSS 心形 */}
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 css-heart" />
+                {/* 满瓶星点 — 大小不一、闪烁不同步 */}
+                {[
+                  { cx: 15, cy: 20, r: 1.2, d: "0s" },
+                  { cx: 38, cy: 12, r: 1.6, d: "0.8s" },
+                  { cx: 55, cy: 28, r: 1.0, d: "1.6s" },
+                  { cx: 22, cy: 42, r: 1.4, d: "2.4s" },
+                  { cx: 48, cy: 50, r: 1.8, d: "0.4s" },
+                  { cx: 30, cy: 62, r: 1.1, d: "1.2s" },
+                  { cx: 52, cy: 68, r: 1.3, d: "2.0s" },
+                  { cx: 18, cy: 70, r: 0.9, d: "2.8s" },
+                  { cx: 42, cy: 35, r: 1.5, d: "3.2s" },
+                  { cx: 35, cy: 8, r: 0.8, d: "1.0s" },
+                ].map((s, i) => (
+                  <div
+                    key={i}
+                    className="absolute rounded-full"
+                    style={{
+                      left: s.cx,
+                      top: s.cy,
+                      width: s.r * 2,
+                      height: s.r * 2,
+                      background: "rgba(251,240,210,0.7)",
+                      boxShadow: `0 0 ${s.r * 2}px rgba(251,220,160,0.4)`,
+                      animation: `star-twinkle ${2.5 + Math.random() * 2}s ease-in-out ${s.d} infinite`,
+                    }}
+                  />
+                ))}
               </div>
             </div>
 
