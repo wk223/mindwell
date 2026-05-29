@@ -5,6 +5,7 @@ import MessageBubble from "./MessageBubble";
 import TypingIndicator from "./TypingIndicator";
 import CrisisBanner from "./CrisisBanner";
 import ChatInput from "./ChatInput";
+import { AIPresenceIcon } from "../shared/NavIcons";
 
 const staggerContainer = {
   hidden: {},
@@ -43,17 +44,11 @@ export default function ChatContainer() {
               transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] as const }}
               className="empty-atmosphere"
             >
-              {/* 呼吸光环 AI 头像 — 纯 CSS breathing-presence */}
+              {/* 豆包感 AI 陪伴图标 */}
               <div className="relative mx-auto mb-8">
-                <div className="breathing-presence w-20 h-20 flex items-center justify-center mx-auto">
-                  {/* CSS 月亮符号 */}
-                  <div
-                    className="w-8 h-8 rounded-full"
-                    style={{
-                      background: "radial-gradient(circle at 35% 35%, var(--accent-300) 0%, var(--accent-400) 50%, var(--accent-500) 100%)",
-                      boxShadow: "0 0 16px -4px var(--accent-400)",
-                    }}
-                  />
+                <div className="breathing-presence w-20 h-20 flex items-center justify-center mx-auto"
+                  style={{ color: "var(--accent-400)" }}>
+                  <AIPresenceIcon size={44} />
                 </div>
               </div>
 
@@ -84,10 +79,10 @@ export default function ChatContainer() {
                 className="mt-8 flex flex-wrap justify-center gap-2.5 relative z-10"
               >
                 {[
-                  "今天有什么有趣的事情分享吗",
-                  "今天过得怎么样呀",
-                  "最近有什么让你开心的事",
-                  "有什么想跟我聊聊的吗",
+                  "今天让我感恩的三件小事",
+                  "我最近做得很棒的一件事",
+                  "此刻身体哪个部位最放松",
+                  "如果给自己一个拥抱会说什么",
                 ].map((phrase) => (
                   <button
                     key={phrase}

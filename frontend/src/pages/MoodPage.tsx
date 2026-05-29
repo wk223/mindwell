@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMoodStore } from "../stores/useMoodStore";
-import { MOOD_LABELS, type MoodEntry } from "../types/mood";
+import { MOOD_EMOJIS, MOOD_LABELS, type MoodEntry } from "../types/mood";
 import { cn } from "../utils/cn";
 
 const easeOut = [0.25, 0.1, 0.25, 1] as const;
@@ -113,6 +113,7 @@ export default function MoodPage() {
                 }}
                 title={MOOD_LABELS[val]}
               >
+                <span className="text-xs leading-none">{MOOD_EMOJIS[val]}</span>
                 <span
                   className="text-[10px] font-medium transition-colors"
                   style={{ color: isSelected ? color : "var(--text-tertiary)" }}

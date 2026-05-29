@@ -185,11 +185,21 @@
   100% { background-position: 200% 0; }
 }
 
-/* ── 星光闪烁 (随机相位) ── */
+/* ── 星光闪烁 (随机相位) — 保留给玻璃瓶星点 ── */
 @keyframes star-twinkle {
   0%, 100% { opacity: 0.2; transform: scale(0.8); }
   30% { opacity: 0.9; transform: scale(1.2); }
   60% { opacity: 0.4; transform: scale(0.9); }
+}
+
+/* ── 星空自转漂移 — 全局背景星点 ── */
+@keyframes star-drift {
+  0%   { transform: translate(0, 0) scale(1); opacity: 0.25; }
+  20%  { transform: translate(8px, -12px) scale(1.08); opacity: 0.55; }
+  40%  { transform: translate(16px, 4px) scale(0.95); opacity: 0.35; }
+  60%  { transform: translate(-4px, 16px) scale(1.05); opacity: 0.5; }
+  80%  { transform: translate(-14px, -6px) scale(0.92); opacity: 0.3; }
+  100% { transform: translate(0, 0) scale(1); opacity: 0.25; }
 }
 
 /* ── 浮动 ── */
@@ -316,7 +326,7 @@
   background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, transparent 70%);
   box-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
   position: absolute;
-  animation: star-twinkle 4s ease-in-out infinite;
+  animation: star-drift 12s ease-in-out infinite;
 }
 
 /* 大星点 */
@@ -329,7 +339,7 @@
     0 0 8px rgba(200, 180, 220, 0.4),
     0 0 16px rgba(200, 180, 220, 0.1);
   position: absolute;
-  animation: star-twinkle 6s ease-in-out infinite;
+  animation: star-drift 16s ease-in-out infinite;
 }
 
 /* ── 玻璃拟态 (glassmorphism 三档) ── */

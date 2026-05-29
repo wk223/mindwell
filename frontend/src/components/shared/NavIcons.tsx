@@ -106,3 +106,50 @@ export function NightIcon({ size = 20, active }: IconProps) {
     </svg>
   );
 }
+
+/* ── 豆包感 AI 陪伴图标 — 柔软云朵 + 暖光 ── */
+export function AIPresenceIcon({ size = 48 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none">
+      {/* 外层柔光 */}
+      <circle cx="32" cy="30" r="22" fill="currentColor" opacity="0.06" />
+      {/* 云朵主体 — 圆润叠加 */}
+      <ellipse cx="24" cy="34" rx="12" ry="9" fill="currentColor" opacity="0.18" />
+      <ellipse cx="38" cy="34" rx="14" ry="10" fill="currentColor" opacity="0.22" />
+      <ellipse cx="32" cy="28" rx="16" ry="11" fill="currentColor" opacity="0.25" />
+      <circle cx="28" cy="24" r="7" fill="currentColor" opacity="0.3" />
+      <circle cx="36" cy="23" r="8" fill="currentColor" opacity="0.28" />
+      {/* 暖色核心 — 小太阳 */}
+      <circle cx="32" cy="30" r="5" fill="currentColor" opacity="0.5" />
+      <circle cx="32" cy="30" r="2.5" fill="#fef3c7" opacity="0.8" />
+      {/* 底部微光 */}
+      <ellipse cx="32" cy="42" rx="10" ry="2" fill="currentColor" opacity="0.08" />
+    </svg>
+  );
+}
+
+/* ── ECHO 主视觉图标 — 翻开的书 + 星光 + 宇宙环 ── */
+export function EchoHeroIcon({ size = 48 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none">
+      {/* 外环 — 宇宙轨迹 */}
+      <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="0.6" opacity="0.2"
+        strokeDasharray="3 5" />
+      <circle cx="32" cy="32" r="24" stroke="currentColor" strokeWidth="0.4" opacity="0.12" />
+      {/* 左书页 */}
+      <path d="M32 12v28M14 20v18a2 2 0 002 2h16V12H16a2 2 0 00-2 2z"
+        fill="currentColor" fillOpacity="0.08" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+      {/* 右书页 */}
+      <path d="M32 12v28h16a2 2 0 002-2V20a2 2 0 00-2-2H32z"
+        fill="currentColor" fillOpacity="0.04" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+      {/* 书脊星光 */}
+      <path d="M32 18l1.5 3.2 3.5.5-2.5 2.4.6 3.4-3.1-1.6-3.1 1.6.6-3.4-2.5-2.4 3.5-.5L32 18z"
+        fill="currentColor" opacity="0.45" />
+      {/* 右上伴星 */}
+      <circle cx="46" cy="16" r="1.5" fill="currentColor" opacity="0.3" />
+      <circle cx="50" cy="20" r="1" fill="currentColor" opacity="0.2" />
+      {/* 左下伴星 */}
+      <circle cx="18" cy="46" r="1.2" fill="currentColor" opacity="0.25" />
+    </svg>
+  );
+}

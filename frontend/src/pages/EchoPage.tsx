@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { apiRequest } from "../api/client";
 import { pickAnswer } from "../components/night/echoAnswers";
+import { EchoHeroIcon } from "../components/shared/NavIcons";
 
 const easeOut = [0.25, 0.1, 0.25, 1] as const;
 
@@ -166,18 +167,10 @@ export default function EchoPage() {
           <motion.div
             animate={{ opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="mx-auto mb-5 w-14 h-14 rounded-full relative"
-            style={{
-              background: "var(--bg-glass)",
-              border: "0.5px solid var(--card-border)",
-              boxShadow: "0 0 40px -8px var(--breathing-color)",
-            }}
+            className="mx-auto mb-5"
+            style={{ color: "var(--accent-400)" }}
           >
-            {/* 书页符号 */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-4 h-0.5 rounded-full" style={{ background: "var(--accent-400)", opacity: 0.5 }} />
-              <div className="absolute w-0.5 h-4 rounded-full" style={{ background: "var(--accent-400)", opacity: 0.5 }} />
-            </div>
+            <EchoHeroIcon size={56} />
           </motion.div>
           <h1 className="font-serif text-3xl font-semibold tracking-tight" style={{ color: "var(--text-primary)" }}>
             ECHO 答案之书
