@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { apiRequest } from "../api/client";
 import { pickAnswer } from "../components/night/echoAnswers";
-import { EchoHeroIcon } from "../components/shared/NavIcons";
+
 
 const easeOut = [0.25, 0.1, 0.25, 1] as const;
 
@@ -163,23 +163,30 @@ export default function EchoPage() {
           transition={{ duration: 0.8, ease: easeOut }}
           className="text-center mb-10"
         >
-          {/* ECHO 主图标 — 精装书本 */}
+          {/* ECHO 主图标 — 答案之书照片 */}
           <div className="flex justify-center mb-5">
             <motion.div
-              animate={{ opacity: [0.6, 1, 0.6] }}
+              animate={{ opacity: [0.65, 1, 0.65] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
               className="relative"
-              style={{ color: "var(--accent-400)" }}
             >
               {/* 光晕背景 */}
               <div className="absolute inset-0 rounded-full"
                 style={{
-                  background: "radial-gradient(circle, color-mix(in srgb, var(--accent-400) 10%, transparent) 0%, transparent 70%)",
-                  filter: "blur(16px)",
-                  transform: "scale(1.8)",
+                  background: "radial-gradient(circle, color-mix(in srgb, var(--accent-400) 12%, transparent) 0%, transparent 70%)",
+                  filter: "blur(20px)",
+                  transform: "scale(2.2)",
                 }}
               />
-              <EchoHeroIcon size={64} />
+              <img
+                src="/textures/answers-book.jpg"
+                alt="答案之书"
+                className="relative w-20 h-20 object-cover rounded-2xl"
+                style={{
+                  boxShadow: "0 0 30px -8px color-mix(in srgb, var(--accent-400) 25%, transparent)",
+                  border: "1px solid color-mix(in srgb, var(--accent-400) 20%, transparent)",
+                }}
+              />
             </motion.div>
           </div>
           <h1 className="font-serif text-3xl font-semibold tracking-tight" style={{ color: "var(--text-primary)" }}>
