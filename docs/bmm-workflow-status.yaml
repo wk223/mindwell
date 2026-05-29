@@ -1,20 +1,19 @@
 project_name: "MindWell (观心 / ECHO)"
 project_type: "web-app"
 project_level: 3
-last_updated: "2025-07-16"
+last_updated: "2025-07-17"
 phase_1_analysis:
   product_brief: ""  # User provided detailed 16-point modification list — counts as brief
 phase_2_planning:
   prd: "docs/bmad-prd.md"
-  tech_spec: ""
-  decisions: "pending (D1-D6)"
-  d1_scene_tech: ""
-  d2_daynight_toggle: ""
-  d3_scene_analytics: ""
-  d4_mood_map: ""
-  d5_mvp_scenes: ""
-  d6_ios_blur: ""
-  tech_spec: ""
+  tech_spec: "docs/stories/sprint-tech-spec-emotion-planet-001.md"
+  decisions: "completed (ADR-001~ADR-004)"
+  d1_scene_tech: "R3F + drei + Three.js"
+  d2_daynight_toggle: "CSS Variables Token System"
+  d3_scene_analytics: "Zustand universeStore"
+  d4_mood_map: "mood_score → PlanetType + Planet preview"
+  d5_mvp_scenes: "universe page + 6 planet types + detail interaction"
+  d6_ios_blur: "backdrop-filter fallback"
 phase_3_solutioning:
   architecture: ""
   gate_check_passed: false
