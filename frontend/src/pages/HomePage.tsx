@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useDayNight } from "../hooks/useDayNight";
 import MoonIcon from "../components/shared/MoonIcon";
+import SunIcon from "../components/shared/SunIcon";
+import ThemeToggle from "../components/shared/ThemeToggle";
 
 const easeOut = [0.25, 0.1, 0.25, 1] as const;
 
@@ -32,10 +34,15 @@ const fadeUp = {
 export default function HomePage() {
   const [showAbout, setShowAbout] = useState(false);
   const navigate = useNavigate();
-  const { greeting } = useDayNight();
+  const { greeting, mode } = useDayNight();
 
   return (
     <div className="max-w-5xl mx-auto px-8 py-10 pb-20">
+      {/* ── 日夜切换按钮 ── */}
+      <div className="flex justify-end mb-4">
+        <ThemeToggle />
+      </div>
+
       {/* ═══════════════════════════════════════════════════
           Hero — 沉浸式情绪场景卡
           纯 CSS 实现：月亮 + 星空 + 湖面反射 + 玻璃瓶 + 爱心 + 植物 + 流光
@@ -176,11 +183,15 @@ export default function HomePage() {
             transition={{ duration: 1, delay: 0.3, ease: easeOut }}
             className="relative flex-shrink-0 w-64 h-64 lg:w-80 lg:h-80"
           >
-            {/* ── 月亮 (CSS crescent) ── */}
+            {/* ── 日间太阳 / 深夜月亮 ── */}
             <div className="absolute top-4 right-8">
-              <MoonIcon size={64} glowing />
+              {mode === "day" ? (
+                <SunIcon size={64} glowing />
+              ) : (
+                <MoonIcon size={64} glowing />
+              )}
             </div>
-            {/* 月光晕 */}
+            {/* 光晕 */}
             <div
               className="absolute top-0 right-4 w-28 h-28 rounded-full animate-breathe pointer-events-none"
               style={{

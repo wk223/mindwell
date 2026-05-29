@@ -23,17 +23,53 @@ export default function RightPanel() {
       transition={{ duration: 0.8, ease: easeOut, delay: 0.3 }}
       className="w-[280px] shrink-0 flex flex-col h-full relative overflow-hidden"
     >
-      {/* Deep background — 使用 CSS 变量跟随日夜切换 */}
+      {/* ── 绿色渐变背景 + 光效 ── */}
       <div
         className="absolute inset-0 transition-[background] duration-[1.8s]"
-        style={{ background: "var(--bg-mid)" }}
+        style={{
+          background:
+            "linear-gradient(180deg, " +
+            "color-mix(in srgb, var(--accent-300) 5%, var(--bg-deep)) 0%, " +
+            "color-mix(in srgb, var(--accent-400) 8%, var(--bg-mid)) 40%, " +
+            "color-mix(in srgb, var(--accent-500) 4%, var(--bg-deep)) 100%)",
+        }}
       />
-      <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-white/[0.04] to-transparent" />
+      {/* 光效浮层 — 右上角绿色辉光 */}
+      <div
+        className="absolute -top-10 -right-10 w-48 h-48 rounded-full pointer-events-none"
+        style={{
+          background: "radial-gradient(circle, color-mix(in srgb, var(--accent-300) 8%, transparent) 0%, transparent 70%)",
+          filter: "blur(50px)",
+          animation: "drift-wide 25s ease-in-out infinite",
+        }}
+      />
+      {/* 左下角辅助光 */}
+      <div
+        className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full pointer-events-none"
+        style={{
+          background: "radial-gradient(circle, color-mix(in srgb, var(--accent-400) 6%, transparent) 0%, transparent 70%)",
+          filter: "blur(40px)",
+          animation: "drift-wide 30s ease-in-out 10s infinite",
+        }}
+      />
+
+      {/* 左侧分割线 */}
+      <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-white/[0.05] to-transparent" />
 
       <div className="relative z-10 flex flex-col h-full px-5 py-7 overflow-y-auto">
         <motion.div className="space-y-5" variants={stagger} initial="initial" animate="animate">
           {/* Today's mood — 呼吸月亮 */}
-          <motion.section variants={itemAnim} className="glass-surface p-5">
+          <motion.section
+            variants={itemAnim}
+            className="p-5 rounded-2xl"
+            style={{
+              background: "color-mix(in srgb, var(--accent-300) 6%, var(--bg-glass))",
+              backdropFilter: "blur(24px)",
+              WebkitBackdropFilter: "blur(24px)",
+              border: "0.5px solid color-mix(in srgb, var(--accent-400) 15%, transparent)",
+              boxShadow: "0 0 30px -10px color-mix(in srgb, var(--accent-400) 10%, transparent), inset 0 1px 0 0 rgba(255,255,255,0.04)",
+            }}
+          >
             <p className="text-[11px] uppercase tracking-widest mb-4" style={{ color: "var(--text-tertiary)" }}>
               今日心情
             </p>
@@ -50,8 +86,18 @@ export default function RightPanel() {
             </div>
           </motion.section>
 
-          {/* Mood trend — 月光渐变色柱 */}
-          <motion.section variants={itemAnim} className="glass-surface p-5">
+          {/* Mood trend */}
+          <motion.section
+            variants={itemAnim}
+            className="p-5 rounded-2xl"
+            style={{
+              background: "color-mix(in srgb, var(--accent-300) 6%, var(--bg-glass))",
+              backdropFilter: "blur(24px)",
+              WebkitBackdropFilter: "blur(24px)",
+              border: "0.5px solid color-mix(in srgb, var(--accent-400) 15%, transparent)",
+              boxShadow: "0 0 30px -10px color-mix(in srgb, var(--accent-400) 10%, transparent), inset 0 1px 0 0 rgba(255,255,255,0.04)",
+            }}
+          >
             <p className="text-[11px] uppercase tracking-widest mb-4" style={{ color: "var(--text-tertiary)" }}>
               近期情绪
             </p>
@@ -74,20 +120,37 @@ export default function RightPanel() {
           </motion.section>
 
           {/* Daily quote */}
-          <motion.section variants={itemAnim} className="glass-surface p-5">
+          <motion.section
+            variants={itemAnim}
+            className="p-5 rounded-2xl"
+            style={{
+              background: "color-mix(in srgb, var(--accent-300) 6%, var(--bg-glass))",
+              backdropFilter: "blur(24px)",
+              WebkitBackdropFilter: "blur(24px)",
+              border: "0.5px solid color-mix(in srgb, var(--accent-400) 15%, transparent)",
+              boxShadow: "0 0 30px -10px color-mix(in srgb, var(--accent-400) 10%, transparent), inset 0 1px 0 0 rgba(255,255,255,0.04)",
+            }}
+          >
             <p className="text-[11px] uppercase tracking-widest mb-4" style={{ color: "var(--text-tertiary)" }}>
               每日语录
             </p>
-            <p
-              className="text-sm leading-relaxed font-serif italic"
-              style={{ color: "var(--text-primary)" }}
-            >
+            <p className="text-sm leading-relaxed font-serif italic" style={{ color: "var(--text-primary)" }}>
               "你不需要总是坚强，偶尔柔软也是一种力量。"
             </p>
           </motion.section>
 
-          {/* Quick actions — 情绪入口 */}
-          <motion.section variants={itemAnim} className="glass-surface p-5">
+          {/* Quick actions */}
+          <motion.section
+            variants={itemAnim}
+            className="p-5 rounded-2xl"
+            style={{
+              background: "color-mix(in srgb, var(--accent-300) 6%, var(--bg-glass))",
+              backdropFilter: "blur(24px)",
+              WebkitBackdropFilter: "blur(24px)",
+              border: "0.5px solid color-mix(in srgb, var(--accent-400) 15%, transparent)",
+              boxShadow: "0 0 30px -10px color-mix(in srgb, var(--accent-400) 10%, transparent), inset 0 1px 0 0 rgba(255,255,255,0.04)",
+            }}
+          >
             <p className="text-[11px] uppercase tracking-widest mb-4" style={{ color: "var(--text-tertiary)" }}>
               情绪入口
             </p>
@@ -118,7 +181,6 @@ export default function RightPanel() {
                     e.currentTarget.style.background = "transparent";
                   }}
                 >
-                  {/* 纯 CSS dot 装饰 */}
                   <span
                     className="w-1.5 h-1.5 rounded-full shrink-0"
                     style={{ background: "var(--accent-400)", opacity: 0.5 }}
@@ -130,7 +192,17 @@ export default function RightPanel() {
           </motion.section>
 
           {/* AI companion status */}
-          <motion.section variants={itemAnim} className="glass-surface p-5">
+          <motion.section
+            variants={itemAnim}
+            className="p-5 rounded-2xl"
+            style={{
+              background: "color-mix(in srgb, var(--accent-300) 6%, var(--bg-glass))",
+              backdropFilter: "blur(24px)",
+              WebkitBackdropFilter: "blur(24px)",
+              border: "0.5px solid color-mix(in srgb, var(--accent-400) 15%, transparent)",
+              boxShadow: "0 0 30px -10px color-mix(in srgb, var(--accent-400) 10%, transparent), inset 0 1px 0 0 rgba(255,255,255,0.04)",
+            }}
+          >
             <p className="text-[11px] uppercase tracking-widest mb-4" style={{ color: "var(--text-tertiary)" }}>
               AI 陪伴状态
             </p>
