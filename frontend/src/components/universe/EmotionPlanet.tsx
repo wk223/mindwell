@@ -3,42 +3,43 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import type { PlanetData } from "../../types/universe";
 import { useUniverseStore } from "../../stores/useUniverseStore";
+import { generatePlanetTexture } from "./planetTexture";
 
-/** 单颗情绪星球 — 公转 + 自转 + 发光 + 点击 */
+/** 纹理缓存 — 避免重复生成 */
+const texCache = new Map<string, THREE.CanvasTexture>();
+
+function getTexture(type: string, seed: number): THREE.CanvasTexture {
+  const key = `${type}-${seed}`;
+  if (texCache.has(key)) return texCache.get(key)!;
+  const canvas = generatePlanetTexture(type as any, seed);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  texCache.set(key, tex);
+  return tex;
+}
+
+/** 单颗情绪星球 — 真实纹理 + 大气层 + 公转自转 */
 export default function EmotionPlanet({ planet }: { planet: PlanetData }) {
   const groupRef = useRef<THREE.Group>(null);
   const meshRef = useRef<THREE.Mesh>(null);
-  const glowRef = useRef<THREE.Mesh>(null);
   const selectedId = useUniverseStore((s) => s.selectedPlanetId);
   const selectPlanet = useUniverseStore((s) => s.selectPlanet);
   const updateAngle = useUniverseStore((s) => s.updatePlanetAngle);
-
   const isSelected = selectedId === planet.id;
 
-  // 星球纹理（程序化梯度）
-  const planetMat = useMemo(() => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 128;
-    canvas.height = 128;
-    const ctx = canvas.getContext("2d")!;
-    const gradient = ctx.createRadialGradient(40, 50, 5, 64, 64, 70);
-    gradient.addColorStop(0, planet.color);
-    gradient.addColorStop(0.5, planet.color + "cc");
-    gradient.addColorStop(1, "#00000033");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 128, 128);
-    return new THREE.CanvasTexture(canvas);
-  }, [planet.color]);
+  const seed = useMemo(() => planet.id.charCodeAt(0) + planet.id.charCodeAt(1) * 31, [planet.id]);
+  const map = useMemo(() => getTexture(planet.type, seed), [planet.type, seed]);
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
     // 公转
     const newAngle = planet.angle + planet.orbitSpeed * delta;
     updateAngle(planet.id, newAngle);
-    const x = Math.cos(newAngle) * planet.orbitRadius;
-    const z = Math.sin(newAngle) * planet.orbitRadius;
-    const y = Math.sin(newAngle * 2) * planet.tilt * planet.orbitRadius;
-    groupRef.current.position.set(x, y, z);
+    groupRef.current.position.set(
+      Math.cos(newAngle) * planet.orbitRadius,
+      Math.sin(newAngle * 2) * planet.tilt * planet.orbitRadius,
+      Math.sin(newAngle) * planet.orbitRadius
+    );
     // 自转
     if (meshRef.current) {
       meshRef.current.rotation.y += delta * planet.rotationSpeed;
@@ -47,13 +48,48 @@ export default function EmotionPlanet({ planet }: { planet: PlanetData }) {
 
   return (
     <group ref={groupRef}>
-      {/* 大气光晕 */}
-      <mesh ref={glowRef} scale={[1.35, 1.35, 1.35]}>
+      {/* 外大气光晕 — 半透明球壳 */}
+      <mesh scale={[1.45, 1.45, 1.45]}>
+        <sphereGeometry args={[planet.size, 32, 32]} />
+        <shaderMaterial
+          transparent
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+          uniforms={{
+            uColor: { value: new THREE.Color(planet.color) },
+            uOpacity: { value: planet.glowIntensity * 0.12 },
+          }}
+          vertexShader={`
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            void main() {
+              vec4 worldPos = modelMatrix * vec4(position, 1.0);
+              vPosition = worldPos.xyz;
+              vNormal = normalize(mat3(modelMatrix) * normal);
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+          `}
+          fragmentShader={`
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            uniform vec3 uColor;
+            uniform float uOpacity;
+            void main() {
+              vec3 viewDir = normalize(cameraPosition - vPosition);
+              float fresnel = pow(1.0 - abs(dot(vNormal, viewDir)), 3.5);
+              gl_FragColor = vec4(uColor, fresnel * uOpacity);
+            }
+          `}
+        />
+      </mesh>
+
+      {/* 内光晕 */}
+      <mesh scale={[1.18, 1.18, 1.18]}>
         <sphereGeometry args={[planet.size, 32, 32]} />
         <meshBasicMaterial
           color={planet.color}
           transparent
-          opacity={0.08 + planet.glowIntensity * 0.06}
+          opacity={0.04}
           depthWrite={false}
         />
       </mesh>
@@ -61,32 +97,23 @@ export default function EmotionPlanet({ planet }: { planet: PlanetData }) {
       {/* 星球主体 */}
       <mesh
         ref={meshRef}
-        onClick={(e) => {
-          e.stopPropagation();
-          selectPlanet(isSelected ? null : planet.id);
-        }}
-        onPointerOver={() => {
-          document.body.style.cursor = "pointer";
-        }}
-        onPointerOut={() => {
-          document.body.style.cursor = "auto";
-        }}
+        onClick={(e) => { e.stopPropagation(); selectPlanet(isSelected ? null : planet.id); }}
+        onPointerOver={() => { document.body.style.cursor = "pointer"; }}
+        onPointerOut={() => { document.body.style.cursor = "auto"; }}
       >
-        <sphereGeometry args={[planet.size, 48, 48]} />
+        <sphereGeometry args={[planet.size, 64, 64]} />
         <meshStandardMaterial
-          map={planetMat}
-          roughness={0.6}
-          metalness={0.1}
-          emissive={new THREE.Color(planet.color)}
-          emissiveIntensity={isSelected ? 0.5 : planet.glowIntensity * 0.25}
+          map={map}
+          roughness={0.75}
+          metalness={0.05}
         />
       </mesh>
 
       {/* 选中指示环 */}
       {isSelected && (
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[planet.size * 1.6, 0.04, 16, 32]} />
-          <meshBasicMaterial color="#ffffff" transparent opacity={0.5} depthWrite={false} />
+        <mesh rotation={[Math.PI / 2.2, 0.3, 0]}>
+          <torusGeometry args={[planet.size * 1.55, 0.03, 16, 48]} />
+          <meshBasicMaterial color="#ffffff" transparent opacity={0.6} depthWrite={false} />
         </mesh>
       )}
     </group>
