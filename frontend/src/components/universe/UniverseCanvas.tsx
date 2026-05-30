@@ -10,8 +10,10 @@ function Scene() {
   const planets = useUniverseStore((s) => s.planets);
   return (
     <>
-      <ambientLight intensity={0.25} />
-      <pointLight position={[0, 0, 0]} intensity={2.5} color="#fde68a" distance={40} />
+      <ambientLight intensity={0.14} />
+      <pointLight position={[0, 0, 0]} intensity={2.1} color="#fde68a" distance={42} />
+      <directionalLight position={[12, 8, 10]} intensity={1.25} color="#f8fbff" />
+      <directionalLight position={[-10, -6, -12]} intensity={0.35} color="#7dd3fc" />
       <Starfield />
       <CenterCore />
       {planets.map((p) => (

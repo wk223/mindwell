@@ -5,6 +5,8 @@ import { useDayNight } from "../hooks/useDayNight";
 import MoonIcon from "../components/shared/MoonIcon";
 import SunIcon from "../components/shared/SunIcon";
 import ThemeToggle from "../components/shared/ThemeToggle";
+import AdviceOverlay from "../components/shared/AdviceOverlay";
+import { ADVICE_LIBRARY } from "../data/advice";
 
 const easeOut = [0.25, 0.1, 0.25, 1] as const;
 
@@ -33,6 +35,7 @@ const fadeUp = {
 
 export default function HomePage() {
   const [showAbout, setShowAbout] = useState(false);
+  const [adviceTopic, setAdviceTopic] = useState<string | null>(null);
   const navigate = useNavigate();
   const { greeting, mode } = useDayNight();
 
@@ -402,23 +405,20 @@ export default function HomePage() {
           </motion.div>
         ))}
 
-        {/* ── 三级卡片 — 标签 ── */}
-        {[
-          "焦虑缓解", "睡眠改善", "积极心态",
-          "自我认知", "情绪恢复力", "人际关系",
-        ].map((tag, i) => (
+        {/* ── 三级卡片 — 暖心建议 ── */}
+        {ADVICE_LIBRARY.map((topic, i) => (
           <motion.div
-            key={i}
+            key={topic.id}
             variants={fadeUp}
-            className="card-tertiary flex items-center gap-3 cursor-pointer"
+            className="card-tertiary flex items-center gap-3 cursor-pointer hover:scale-[1.02] transition-transform"
+            onClick={() => setAdviceTopic(topic.id)}
           >
-            {/* CSS dot */}
             <span
               className="w-2 h-2 rounded-full shrink-0"
               style={{ background: "var(--accent-400)", opacity: 0.45 }}
             />
             <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
-              {tag}
+              {topic.label}
             </span>
           </motion.div>
         ))}
@@ -434,6 +434,14 @@ export default function HomePage() {
           关于小智
         </button>
       </div>
+
+      {/* ── 长者建议弹窗 ── */}
+      {adviceTopic && (
+        <AdviceOverlay
+          topic={ADVICE_LIBRARY.find((t) => t.id === adviceTopic)!}
+          onClose={() => setAdviceTopic(null)}
+        />
+      )}
 
       {/* About modal */}
       {showAbout && (

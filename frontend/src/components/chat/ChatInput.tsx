@@ -68,7 +68,8 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
             whileTap={{ scale: 0.92 }}
             onClick={handleSend}
             disabled={disabled || !input.trim()}
-            className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center
+            className="shrink-0 w-10 h-10 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center
+                       min-w-[44px] min-h-[44px]
                        transition-all duration-300 relative overflow-hidden
                        disabled:opacity-20 disabled:cursor-not-allowed"
             style={{

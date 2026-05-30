@@ -13,8 +13,9 @@ interface PlanetVisualProfile {
   emissive: string;
   roughness: number;
   metalness: number;
-  glowScale: number;
   cloudOpacity: number;
+  cityLight: RGB;
+  emissionStrength: number;
 }
 
 const SIZE = 512;
@@ -31,8 +32,9 @@ const PROFILES: Record<PlanetType, PlanetVisualProfile> = {
     emissive: "#082f49",
     roughness: 0.68,
     metalness: 0.02,
-    glowScale: 1.18,
-    cloudOpacity: 0.26,
+    cloudOpacity: 0.18,
+    cityLight: [112, 225, 255],
+    emissionStrength: 0.18,
   },
   happy: {
     base: [171, 96, 32],
@@ -43,9 +45,10 @@ const PROFILES: Record<PlanetType, PlanetVisualProfile> = {
     atmosphere: "#fde68a",
     emissive: "#422006",
     roughness: 0.58,
-    metalness: 0.04,
-    glowScale: 1.3,
-    cloudOpacity: 0.2,
+    metalness: 0.06,
+    cloudOpacity: 0.14,
+    cityLight: [255, 214, 92],
+    emissionStrength: 0.22,
   },
   sad: {
     base: [55, 61, 122],
@@ -57,8 +60,9 @@ const PROFILES: Record<PlanetType, PlanetVisualProfile> = {
     emissive: "#1e1b4b",
     roughness: 0.78,
     metalness: 0.01,
-    glowScale: 1.12,
-    cloudOpacity: 0.18,
+    cloudOpacity: 0.13,
+    cityLight: [154, 129, 255],
+    emissionStrength: 0.14,
   },
   release: {
     base: [153, 176, 176],
@@ -69,9 +73,10 @@ const PROFILES: Record<PlanetType, PlanetVisualProfile> = {
     atmosphere: "#e2e8f0",
     emissive: "#334155",
     roughness: 0.72,
-    metalness: 0.02,
-    glowScale: 1.22,
-    cloudOpacity: 0.34,
+    metalness: 0.03,
+    cloudOpacity: 0.2,
+    cityLight: [226, 246, 255],
+    emissionStrength: 0.16,
   },
   crisis: {
     base: [88, 37, 60],
@@ -83,8 +88,9 @@ const PROFILES: Record<PlanetType, PlanetVisualProfile> = {
     emissive: "#3f0d20",
     roughness: 0.82,
     metalness: 0.0,
-    glowScale: 1.2,
-    cloudOpacity: 0.16,
+    cloudOpacity: 0.1,
+    cityLight: [255, 93, 123],
+    emissionStrength: 0.2,
   },
   chat: {
     base: [83, 98, 169],
@@ -95,9 +101,10 @@ const PROFILES: Record<PlanetType, PlanetVisualProfile> = {
     atmosphere: "#c4b5fd",
     emissive: "#312e81",
     roughness: 0.64,
-    metalness: 0.02,
-    glowScale: 1.2,
-    cloudOpacity: 0.24,
+    metalness: 0.04,
+    cloudOpacity: 0.16,
+    cityLight: [190, 174, 255],
+    emissionStrength: 0.2,
   },
 };
 
@@ -167,6 +174,34 @@ function paintCraters(ctx: CanvasRenderingContext2D, profile: PlanetVisualProfil
   }
 }
 
+function paintFaultLines(ctx: CanvasRenderingContext2D, profile: PlanetVisualProfile, seed: number) {
+  const rand = mulberry32(seed + 401);
+  const count = 18 + Math.floor(rand() * 16);
+  ctx.save();
+  ctx.globalCompositeOperation = "screen";
+  for (let i = 0; i < count; i += 1) {
+    const y = (0.12 + rand() * 0.76) * (SIZE / 2);
+    const startX = rand() * SIZE;
+    const length = 36 + rand() * 120;
+    const drift = (rand() - 0.5) * 42;
+    const alpha = 0.018 + rand() * 0.045;
+    ctx.beginPath();
+    ctx.moveTo(startX, y);
+    ctx.bezierCurveTo(
+      startX + length * 0.32,
+      y + drift,
+      startX + length * 0.65,
+      y - drift * 0.6,
+      startX + length,
+      y + drift * 0.25
+    );
+    ctx.strokeStyle = colorToCss(profile.accent, alpha);
+    ctx.lineWidth = 0.7 + rand() * 1.6;
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
 function makeSurfaceTexture(type: PlanetType, seed: number) {
   const profile = PROFILES[type];
   const canvas = document.createElement("canvas");
@@ -185,31 +220,35 @@ function makeSurfaceTexture(type: PlanetType, seed: number) {
     for (let x = 0; x < canvas.width; x += 1) {
       const u = x / canvas.width;
       const continental =
-        fbm(u * 5.2 + Math.sin(v * 7 + bandOffset) * 0.14, v * 3.2, seed) * 0.78 +
-        fbm(u * 13.0, v * 9.0, seed + 12) * 0.22;
-      const bands = Math.sin((v * 18 + fbm(u * 2, v * 6, seed + 30) * 2.2 + bandOffset)) * 0.08;
+        fbm(u * 6.4 + Math.sin(v * 8 + bandOffset) * 0.2, v * 3.8, seed) * 0.62 +
+        fbm(u * 18.0, v * 11.0, seed + 12) * 0.26 +
+        fbm(u * 42.0, v * 24.0, seed + 22) * 0.12;
+      const bands = Math.sin((v * 22 + fbm(u * 3, v * 7, seed + 30) * 3.2 + bandOffset)) * 0.11;
       const rimShade = 1 - smoothstep(0.56, 1, lat) * 0.28;
       const landMask = smoothstep(landCutoff - 0.08, landCutoff + 0.07, continental + bands);
       const ice = smoothstep(0.68, 0.94, lat);
-      const detail = fbm(u * 42, v * 28, seed + 7) - 0.5;
+      const detail = fbm(u * 70, v * 42, seed + 7) - 0.5;
+      const ridges = Math.abs(fbm(u * 28, v * 18, seed + 61) - 0.5) * 2;
       let color = mix(profile.base, profile.land, landMask);
       color = mix(color, profile.deep, smoothstep(0.1, 0.55, 1 - continental) * 0.42);
       color = mix(color, profile.cloud, ice * (type === "happy" ? 0.18 : 0.32));
 
-      const glowBand = Math.max(0, Math.sin((u + v * 0.16 + bandOffset) * Math.PI * 4)) * 0.06;
-      const accent = smoothstep(0.65, 1, continental + detail * 0.4) * 0.22 + glowBand;
+      const glowBand = Math.max(0, Math.sin((u + v * 0.16 + bandOffset) * Math.PI * 5)) * 0.055;
+      const accent = smoothstep(0.72, 1, continental + detail * 0.5 + ridges * 0.16) * 0.26 + glowBand;
       color = mix(color, profile.accent, accent);
+      color = mix(color, profile.deep, smoothstep(0.58, 1, ridges) * 0.14);
 
       const idx = (y * canvas.width + x) * 4;
-      data[idx] = clampColor(color[0] * rimShade + detail * 28);
-      data[idx + 1] = clampColor(color[1] * rimShade + detail * 24);
-      data[idx + 2] = clampColor(color[2] * rimShade + detail * 22);
+      data[idx] = clampColor(color[0] * rimShade + detail * 34);
+      data[idx + 1] = clampColor(color[1] * rimShade + detail * 30);
+      data[idx + 2] = clampColor(color[2] * rimShade + detail * 28);
       data[idx + 3] = 255;
     }
   }
 
   ctx.putImageData(image, 0, 0);
   paintCraters(ctx, profile, seed);
+  paintFaultLines(ctx, profile, seed);
 
   const terminator = ctx.createLinearGradient(0, 0, canvas.width, 0);
   terminator.addColorStop(0, "rgba(0,0,0,0.18)");
@@ -251,6 +290,65 @@ function makeCloudTexture(type: PlanetType, seed: number) {
   return canvas;
 }
 
+function makeEmissionTexture(type: PlanetType, seed: number) {
+  const profile = PROFILES[type];
+  const canvas = document.createElement("canvas");
+  canvas.width = SIZE;
+  canvas.height = SIZE / 2;
+  const ctx = canvas.getContext("2d")!;
+  const image = ctx.createImageData(canvas.width, canvas.height);
+  const data = image.data;
+
+  for (let y = 0; y < canvas.height; y += 1) {
+    const v = y / canvas.height;
+    const lat = Math.abs(v - 0.5) * 2;
+    for (let x = 0; x < canvas.width; x += 1) {
+      const u = x / canvas.width;
+      const network = fbm(u * 38, v * 20, seed + 501);
+      const vein = Math.abs(fbm(u * 14 + v * 1.5, v * 9, seed + 533) - 0.5) * 2;
+      const latitudeMask = 1 - smoothstep(0.58, 0.98, lat);
+      const lights = smoothstep(0.82, 0.985, network) * smoothstep(0.35, 0.02, vein) * latitudeMask;
+      const idx = (y * canvas.width + x) * 4;
+      data[idx] = profile.cityLight[0];
+      data[idx + 1] = profile.cityLight[1];
+      data[idx + 2] = profile.cityLight[2];
+      data[idx + 3] = Math.round(lights * 255 * profile.emissionStrength);
+    }
+  }
+
+  ctx.putImageData(image, 0, 0);
+  return canvas;
+}
+
+function makeBumpTexture(type: PlanetType, seed: number) {
+  const canvas = document.createElement("canvas");
+  canvas.width = SIZE;
+  canvas.height = SIZE / 2;
+  const ctx = canvas.getContext("2d")!;
+  const image = ctx.createImageData(canvas.width, canvas.height);
+  const data = image.data;
+
+  for (let y = 0; y < canvas.height; y += 1) {
+    const v = y / canvas.height;
+    for (let x = 0; x < canvas.width; x += 1) {
+      const u = x / canvas.width;
+      const continent = fbm(u * 8, v * 5, seed + 801);
+      const ridge = Math.abs(fbm(u * 36, v * 20, seed + 821) - 0.5) * 2;
+      const crater = fbm(u * 92, v * 44, seed + 833);
+      const height = smoothstep(0.46, 0.82, continent) * 112 + smoothstep(0.62, 1, ridge) * 78 + crater * 30;
+      const value = clampColor(58 + height);
+      const idx = (y * canvas.width + x) * 4;
+      data[idx] = value;
+      data[idx + 1] = value;
+      data[idx + 2] = value;
+      data[idx + 3] = 255;
+    }
+  }
+
+  ctx.putImageData(image, 0, 0);
+  return canvas;
+}
+
 function toTexture(canvas: HTMLCanvasElement) {
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -275,6 +373,24 @@ export function getPlanetCloudTexture(type: PlanetType, seed: number): THREE.Can
   const cached = texCache.get(key);
   if (cached) return cached;
   const tex = toTexture(makeCloudTexture(type, seed));
+  texCache.set(key, tex);
+  return tex;
+}
+
+export function getPlanetEmissionTexture(type: PlanetType, seed: number): THREE.CanvasTexture {
+  const key = `emission-${type}-${Math.abs(seed) % 10000}`;
+  const cached = texCache.get(key);
+  if (cached) return cached;
+  const tex = toTexture(makeEmissionTexture(type, seed));
+  texCache.set(key, tex);
+  return tex;
+}
+
+export function getPlanetBumpTexture(type: PlanetType, seed: number): THREE.CanvasTexture {
+  const key = `bump-${type}-${Math.abs(seed) % 10000}`;
+  const cached = texCache.get(key);
+  if (cached) return cached;
+  const tex = toTexture(makeBumpTexture(type, seed));
   texCache.set(key, tex);
   return tex;
 }
