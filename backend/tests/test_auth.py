@@ -89,19 +89,24 @@ class TestLogin:
 
 
 class TestTokenExpiry:
-    async def test_expired_token_rejected(self, client: AsyncClient):
+    async def test_expired_token_rejected(self):
         """使用过期 token 应返回 401"""
         from datetime import datetime, timedelta, timezone
         from jose import jwt
         from app.config import get_settings
-        import uuid
+        from app.main import app
+        from httpx import ASGITransport, AsyncClient as AC
+        import uuid as _uuid
 
         settings = get_settings()
         expire = datetime.now(timezone.utc) - timedelta(hours=1)
         token = jwt.encode(
-            {"sub": str(uuid.uuid4()), "exp": expire},
+            {"sub": str(_uuid.uuid4()), "exp": expire},
             settings.jwt_secret,
             algorithm=settings.jwt_algorithm,
         )
-        resp = await client.get("/api/v1/mood/today", headers={"Authorization": f"Bearer {token}"})
-        assert resp.status_code == 401
+        transport = ASGITransport(app=app)
+        async with AC(transport=transport, base_url="http://test") as ac:
+            resp = await ac.get("/api/v1/mood/today",
+                headers={"Authorization": f"Bearer {token}"})
+            assert resp.status_code == 401

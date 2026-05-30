@@ -23,14 +23,34 @@ test_engine = create_async_engine(TEST_DB_URL, echo=False)
 TestSessionFactory = async_sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
 
 
+@pytest.fixture
+def rule_engine():
+    """Safety RuleEngine fixture（旧测试兼容）"""
+    from app.core.safety.rule_engine import RuleEngine
+    return RuleEngine()
+
+
 @pytest.fixture(scope="session", autouse=True)
-def patch_redis():
-    """全局替换 Redis — 避免 lifespan 连接超时"""
-    from unittest.mock import AsyncMock, patch
+def patch_external():
+    """全局替换 Redis + LLM + Safety — 避免外部依赖"""
+    from unittest.mock import AsyncMock, MagicMock, patch
+
     mock_redis = AsyncMock()
     mock_redis.ping.return_value = True
+
+    # Mock LLM client
+    mock_llm = AsyncMock()
+    mock_llm.chat = AsyncMock(return_value="这是一条测试回复。")
+
+    # Mock rule engine
+    mock_engine = MagicMock()
+    mock_engine.detect.return_value = []
+    mock_engine.get_crisis_response.return_value = None
+
     with patch("app.db.redis.get_redis", return_value=mock_redis), \
-         patch("app.db.redis.close_redis", new_callable=AsyncMock):
+         patch("app.db.redis.close_redis", new_callable=AsyncMock), \
+         patch("app.core.llm.client.get_llm_client", return_value=mock_llm), \
+         patch("app.core.safety.rule_engine.get_rule_engine", return_value=mock_engine):
         yield
 
 
@@ -56,6 +76,18 @@ async def setup_db():
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
+    # 插入测试用户
+    async with TestSessionFactory() as session:
+        from app.models.user import User
+        test_user = User(
+            id=uuid.UUID("a0000000-0000-0000-0000-000000000001"),
+            nickname="testuser",
+            email_hash="test_hash",
+            password_hash="fake",
+            is_active=True,
+        )
+        session.add(test_user)
+        await session.commit()
     yield
 
 
@@ -75,11 +107,13 @@ async def client(db: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     from app.db.redis import get_redis
     from app.dependencies import get_current_user
 
+    TEST_USER_ID = uuid.UUID("a0000000-0000-0000-0000-000000000001")
+
     # 绕过 JWT 认证
     async def override_get_current_user():
         from app.models.user import User
         return User(
-            id=uuid.uuid4(),
+            id=TEST_USER_ID,
             nickname="testuser",
             email_hash="test_hash",
             password_hash="fake",
@@ -96,9 +130,13 @@ async def client(db: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
             async def set(self, key, val, ex=None): pass
             async def incr(self, key): return 1
             async def expire(self, key, ttl): pass
+            async def delete(self, *keys): pass
+            async def keys(self, pattern="*"): return []
             async def lrange(self, key, start, end): return []
             async def rpush(self, key, *vals): pass
             async def ltrim(self, key, start, end): pass
+            async def hset(self, key, mapping): pass
+            async def hget(self, key, field): return None
             async def close(self): pass
             async def ping(self): return True
         return FakeRedis()
