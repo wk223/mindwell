@@ -7,7 +7,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "http://localhost:8000",
+        target: "http://121.4.44.210",   // 远程服务器 API（本地开发无需 Docker）
         changeOrigin: true,
       },
     },
