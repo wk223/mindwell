@@ -19,8 +19,17 @@ const PREFIX = "mw_";
 function getToken(): string | null {
   try {
     const raw = localStorage.getItem(TOKEN_KEY);
-    if (!raw || !raw.startsWith(PREFIX)) return null;
-    return atob(raw.slice(PREFIX.length));
+    if (!raw) return null;
+    // 新格式：mw_ + Base64
+    if (raw.startsWith(PREFIX)) {
+      return atob(raw.slice(PREFIX.length));
+    }
+    // 旧格式向后兼容：明文 token → 自动迁移到新格式
+    if (raw.startsWith("eyJ")) {  // JWT 通常以 eyJ 开头
+      setToken(raw);
+      return raw;
+    }
+    return null;
   } catch { return null; }
 }
 
