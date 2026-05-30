@@ -27,6 +27,12 @@ services:
     image: redis:7-alpine
     restart: always
     logging: *logging
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --save 900 1
+      --save 300 10
     volumes:
       - redis_data:/data
     healthcheck:
@@ -72,9 +78,15 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
-        echo "Pulling model ${LLM_MODEL:-qwen2.5:7b}..."
-        ollama pull ${LLM_MODEL:-qwen2.5:7b}
-        echo "Model ready."
+        MODEL="${LLM_MODEL:-qwen2.5:7b}"
+        echo "Pulling model $MODEL (max 3 retries)..."
+        for i in 1 2 3; do
+          ollama pull "$MODEL" && echo "Model ready." && exit 0
+          echo "Attempt $i failed, retrying in 10s..."
+          sleep 10
+        done
+        echo "ERROR: Failed to pull model after 3 attempts" >&2
+        exit 1
     environment:
       - OLLAMA_HOST=ollama:11434
     networks:
@@ -105,17 +117,19 @@ services:
     networks:
       - mindwell
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3).read()"]
-      interval: 30s
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
       timeout: 5s
-      retries: 3
+      retries: 5
+      start_period: 10s
 
   frontend:
     build: ./frontend
     restart: always
     logging: *logging
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     ports:
       - "80:80"
     networks:

@@ -8,6 +8,8 @@ ENV PIP_TRUSTED_HOST=pypi.tuna.tsinghua.edu.cn
 
 COPY . .
 
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+
 RUN pip install --no-cache-dir \
     "fastapi[standard]" \
     "sqlalchemy[asyncio]" \
