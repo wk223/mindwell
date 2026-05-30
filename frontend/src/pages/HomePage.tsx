@@ -7,6 +7,7 @@ import SunIcon from "../components/shared/SunIcon";
 import ThemeToggle from "../components/shared/ThemeToggle";
 import AdviceOverlay from "../components/shared/AdviceOverlay";
 import { ADVICE_LIBRARY } from "../data/advice";
+import StrangerWall from "../components/home/StrangerWall";
 
 const easeOut = [0.25, 0.1, 0.25, 1] as const;
 
@@ -423,6 +424,9 @@ export default function HomePage() {
           </motion.div>
         ))}
       </motion.div>
+
+      {/* ── 陌生人的信 ── */}
+      <StrangerWall />
 
       {/* About button */}
       <div className="pt-8 pb-4 text-center">
