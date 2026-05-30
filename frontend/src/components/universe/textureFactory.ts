@@ -1,129 +1,288 @@
-/**
- * 星球纹理工厂 — 基于 4 张真实照片生成多种变体
- * 通过 HSL 偏移 + 对比度 + 饱和度生成看似不同的星球
- */
-const BASE_PATH = "/textures";
+import * as THREE from "three";
+import type { PlanetType } from "../../types/universe";
 
-const BASES: Record<string, string> = {
-  calm:    `${BASE_PATH}/planet-blue.jpg`,
-  happy:   `${BASE_PATH}/planet-gold.jpg`,
-  sad:     `${BASE_PATH}/planet-dark.jpg`,
-  release: `${BASE_PATH}/planet-white.jpg`,
-  chat:    `${BASE_PATH}/planet-blue.jpg`,
-  crisis:  `${BASE_PATH}/planet-dark.jpg`,
-};
+type RGB = [number, number, number];
 
-/** 每种类型的变体参数 */
-interface Variant {
-  hueShift: number;   // -180 ~ 180
-  satMult: number;    // 0.5 ~ 1.5
-  lightAdd: number;   // -30 ~ 30
-  contrast: number;   // 0.8 ~ 1.4
+interface PlanetVisualProfile {
+  base: RGB;
+  deep: RGB;
+  land: RGB;
+  cloud: RGB;
+  accent: RGB;
+  atmosphere: string;
+  emissive: string;
+  roughness: number;
+  metalness: number;
+  glowScale: number;
+  cloudOpacity: number;
 }
 
-// 预定义变体池 — 同类型星球各有不同外观
-const VARIANT_POOL: Variant[] = [
-  { hueShift: 0,   satMult: 1.0,  lightAdd: 0,   contrast: 1.0  },  // 原图
-  { hueShift: 15,  satMult: 1.1,  lightAdd: 5,   contrast: 1.05 },  // 暖调
-  { hueShift: -12, satMult: 0.9,  lightAdd: -8,  contrast: 1.15 },  // 冷深
-  { hueShift: 25,  satMult: 1.15, lightAdd: 3,   contrast: 0.95 },  // 鲜艳
-  { hueShift: -20, satMult: 0.85, lightAdd: -5,  contrast: 1.2  },  // 暗沉
-  { hueShift: 8,   satMult: 0.95, lightAdd: 10,  contrast: 0.9  },  // 明亮
-  { hueShift: -8,  satMult: 1.05, lightAdd: -3,  contrast: 1.1  },  // 微冷
-  { hueShift: 30,  satMult: 1.2,  lightAdd: 0,   contrast: 1.0  },  // 暖金
-];
-
+const SIZE = 512;
 const texCache = new Map<string, THREE.CanvasTexture>();
 
-function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
-  r /= 255; g /= 255; b /= 255;
-  const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  let h = 0, s = 0;
-  const l = (max + min) / 2;
-  if (max !== min) {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
-    else if (max === g) h = ((b - r) / d + 2) / 6;
-    else h = ((r - g) / d + 4) / 6;
-  }
-  return [h * 360, s, l];
-}
+const PROFILES: Record<PlanetType, PlanetVisualProfile> = {
+  calm: {
+    base: [58, 128, 154],
+    deep: [12, 38, 62],
+    land: [82, 166, 132],
+    cloud: [216, 249, 244],
+    accent: [121, 211, 252],
+    atmosphere: "#7dd3fc",
+    emissive: "#082f49",
+    roughness: 0.68,
+    metalness: 0.02,
+    glowScale: 1.18,
+    cloudOpacity: 0.26,
+  },
+  happy: {
+    base: [171, 96, 32],
+    deep: [76, 37, 12],
+    land: [227, 171, 73],
+    cloud: [255, 241, 190],
+    accent: [250, 204, 21],
+    atmosphere: "#fde68a",
+    emissive: "#422006",
+    roughness: 0.58,
+    metalness: 0.04,
+    glowScale: 1.3,
+    cloudOpacity: 0.2,
+  },
+  sad: {
+    base: [55, 61, 122],
+    deep: [10, 14, 42],
+    land: [93, 80, 170],
+    cloud: [188, 201, 245],
+    accent: [139, 92, 246],
+    atmosphere: "#a78bfa",
+    emissive: "#1e1b4b",
+    roughness: 0.78,
+    metalness: 0.01,
+    glowScale: 1.12,
+    cloudOpacity: 0.18,
+  },
+  release: {
+    base: [153, 176, 176],
+    deep: [56, 73, 83],
+    land: [207, 222, 214],
+    cloud: [248, 250, 252],
+    accent: [226, 232, 240],
+    atmosphere: "#e2e8f0",
+    emissive: "#334155",
+    roughness: 0.72,
+    metalness: 0.02,
+    glowScale: 1.22,
+    cloudOpacity: 0.34,
+  },
+  crisis: {
+    base: [88, 37, 60],
+    deep: [18, 12, 25],
+    land: [145, 55, 80],
+    cloud: [245, 196, 205],
+    accent: [251, 113, 133],
+    atmosphere: "#fb7185",
+    emissive: "#3f0d20",
+    roughness: 0.82,
+    metalness: 0.0,
+    glowScale: 1.2,
+    cloudOpacity: 0.16,
+  },
+  chat: {
+    base: [83, 98, 169],
+    deep: [20, 28, 70],
+    land: [124, 116, 214],
+    cloud: [226, 232, 255],
+    accent: [196, 181, 253],
+    atmosphere: "#c4b5fd",
+    emissive: "#312e81",
+    roughness: 0.64,
+    metalness: 0.02,
+    glowScale: 1.2,
+    cloudOpacity: 0.24,
+  },
+};
 
-function hslToRgb(h: number, s: number, l: number): [number, number, number] {
-  h /= 360;
-  const hue2rgb = (p: number, q: number, t: number) => {
-    if (t < 0) t += 1; if (t > 1) t -= 1;
-    if (t < 1/6) return p + (q - p) * 6 * t;
-    if (t < 1/2) return q;
-    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-    return p;
+function mulberry32(seed: number) {
+  return () => {
+    let t = seed += 0x6D2B79F5;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-  const p = 2 * l - q;
-  return [Math.round(hue2rgb(p, q, h + 1/3) * 255), Math.round(hue2rgb(p, q, h) * 255), Math.round(hue2rgb(p, q, h - 1/3) * 255)];
 }
 
-import * as THREE from "three";
+function hashNoise(x: number, y: number, seed: number) {
+  const n = Math.sin(x * 127.1 + y * 311.7 + seed * 74.7) * 43758.5453;
+  return n - Math.floor(n);
+}
 
-/** 根据类型+seed 获取/生成纹理 */
-export function getPlanetTexture(type: string, seed: number): THREE.CanvasTexture | null {
-  const variantIdx = Math.abs(seed) % VARIANT_POOL.length;
-  const key = `${type}-v${variantIdx}`;
-  if (texCache.has(key)) return texCache.get(key)!;
+function smoothstep(edge0: number, edge1: number, x: number) {
+  const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
 
-  const baseUrl = BASES[type] || BASES.calm;
-  const baseImg = preloadCache.get(baseUrl);
-  if (!baseImg) return null;
+function fbm(x: number, y: number, seed: number) {
+  let value = 0;
+  let amplitude = 0.5;
+  let frequency = 1;
+  for (let i = 0; i < 6; i += 1) {
+    value += amplitude * hashNoise(x * frequency, y * frequency, seed + i * 19);
+    frequency *= 2.05;
+    amplitude *= 0.52;
+  }
+  return value;
+}
 
-  const variant = VARIANT_POOL[variantIdx];
+function mix(a: RGB, b: RGB, t: number): RGB {
+  return [
+    Math.round(a[0] + (b[0] - a[0]) * t),
+    Math.round(a[1] + (b[1] - a[1]) * t),
+    Math.round(a[2] + (b[2] - a[2]) * t),
+  ];
+}
+
+function clampColor(v: number) {
+  return Math.max(0, Math.min(255, Math.round(v)));
+}
+
+function colorToCss([r, g, b]: RGB, alpha = 1) {
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function paintCraters(ctx: CanvasRenderingContext2D, profile: PlanetVisualProfile, seed: number) {
+  const rand = mulberry32(seed + 99);
+  const count = 18 + Math.floor(rand() * 18);
+  for (let i = 0; i < count; i += 1) {
+    const x = rand() * SIZE;
+    const y = rand() * SIZE * 0.48 + SIZE * 0.02;
+    const radius = 2 + rand() * 12;
+    const alpha = 0.025 + rand() * 0.055;
+    const gradient = ctx.createRadialGradient(x, y, radius * 0.2, x, y, radius);
+    gradient.addColorStop(0, colorToCss(profile.deep, alpha));
+    gradient.addColorStop(0.58, colorToCss(profile.deep, alpha * 0.42));
+    gradient.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function makeSurfaceTexture(type: PlanetType, seed: number) {
+  const profile = PROFILES[type];
   const canvas = document.createElement("canvas");
-  canvas.width = baseImg.width;
-  canvas.height = baseImg.height;
+  canvas.width = SIZE;
+  canvas.height = SIZE / 2;
   const ctx = canvas.getContext("2d")!;
-  ctx.drawImage(baseImg, 0, 0);
+  const image = ctx.createImageData(canvas.width, canvas.height);
+  const data = image.data;
+  const rand = mulberry32(seed);
+  const bandOffset = rand() * Math.PI * 2;
+  const landCutoff = type === "happy" ? 0.48 : type === "sad" ? 0.55 : 0.51;
 
-  if (variant.hueShift !== 0 || variant.satMult !== 1 || variant.lightAdd !== 0 || variant.contrast !== 1) {
-    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const d = imgData.data;
-    for (let i = 0; i < d.length; i += 4) {
-      let [h, s, l] = rgbToHsl(d[i], d[i+1], d[i+2]);
-      h = ((h + variant.hueShift) % 360 + 360) % 360;
-      s = Math.min(1, Math.max(0, s * variant.satMult));
-      l = Math.min(1, Math.max(0, l + variant.lightAdd / 100));
-      l = 0.5 + (l - 0.5) * variant.contrast;
-      l = Math.min(1, Math.max(0, l));
-      const [r, g, b] = hslToRgb(h, s, l);
-      d[i] = r; d[i+1] = g; d[i+2] = b;
+  for (let y = 0; y < canvas.height; y += 1) {
+    const v = y / canvas.height;
+    const lat = Math.abs(v - 0.5) * 2;
+    for (let x = 0; x < canvas.width; x += 1) {
+      const u = x / canvas.width;
+      const continental =
+        fbm(u * 5.2 + Math.sin(v * 7 + bandOffset) * 0.14, v * 3.2, seed) * 0.78 +
+        fbm(u * 13.0, v * 9.0, seed + 12) * 0.22;
+      const bands = Math.sin((v * 18 + fbm(u * 2, v * 6, seed + 30) * 2.2 + bandOffset)) * 0.08;
+      const rimShade = 1 - smoothstep(0.56, 1, lat) * 0.28;
+      const landMask = smoothstep(landCutoff - 0.08, landCutoff + 0.07, continental + bands);
+      const ice = smoothstep(0.68, 0.94, lat);
+      const detail = fbm(u * 42, v * 28, seed + 7) - 0.5;
+      let color = mix(profile.base, profile.land, landMask);
+      color = mix(color, profile.deep, smoothstep(0.1, 0.55, 1 - continental) * 0.42);
+      color = mix(color, profile.cloud, ice * (type === "happy" ? 0.18 : 0.32));
+
+      const glowBand = Math.max(0, Math.sin((u + v * 0.16 + bandOffset) * Math.PI * 4)) * 0.06;
+      const accent = smoothstep(0.65, 1, continental + detail * 0.4) * 0.22 + glowBand;
+      color = mix(color, profile.accent, accent);
+
+      const idx = (y * canvas.width + x) * 4;
+      data[idx] = clampColor(color[0] * rimShade + detail * 28);
+      data[idx + 1] = clampColor(color[1] * rimShade + detail * 24);
+      data[idx + 2] = clampColor(color[2] * rimShade + detail * 22);
+      data[idx + 3] = 255;
     }
-    ctx.putImageData(imgData, 0, 0);
   }
 
+  ctx.putImageData(image, 0, 0);
+  paintCraters(ctx, profile, seed);
+
+  const terminator = ctx.createLinearGradient(0, 0, canvas.width, 0);
+  terminator.addColorStop(0, "rgba(0,0,0,0.18)");
+  terminator.addColorStop(0.25, "rgba(0,0,0,0)");
+  terminator.addColorStop(0.72, "rgba(255,255,255,0.055)");
+  terminator.addColorStop(1, "rgba(0,0,0,0.24)");
+  ctx.fillStyle = terminator;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  return canvas;
+}
+
+function makeCloudTexture(type: PlanetType, seed: number) {
+  const profile = PROFILES[type];
+  const canvas = document.createElement("canvas");
+  canvas.width = SIZE;
+  canvas.height = SIZE / 2;
+  const ctx = canvas.getContext("2d")!;
+  const image = ctx.createImageData(canvas.width, canvas.height);
+  const data = image.data;
+
+  for (let y = 0; y < canvas.height; y += 1) {
+    const v = y / canvas.height;
+    for (let x = 0; x < canvas.width; x += 1) {
+      const u = x / canvas.width;
+      const stream =
+        fbm(u * 8 + v * 2.8, v * 12, seed + 210) * 0.8 +
+        Math.sin((v * 24 + u * 5) * Math.PI) * 0.08;
+      const wisps = smoothstep(0.48, 0.86, stream);
+      const idx = (y * canvas.width + x) * 4;
+      data[idx] = profile.cloud[0];
+      data[idx + 1] = profile.cloud[1];
+      data[idx + 2] = profile.cloud[2];
+      data[idx + 3] = Math.round(wisps * 255 * profile.cloudOpacity);
+    }
+  }
+
+  ctx.putImageData(image, 0, 0);
+  return canvas;
+}
+
+function toTexture(canvas: HTMLCanvasElement) {
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.ClampToEdgeWrapping;
+  tex.anisotropy = 4;
+  tex.needsUpdate = true;
+  return tex;
+}
+
+export function getPlanetTexture(type: PlanetType, seed: number): THREE.CanvasTexture {
+  const key = `surface-${type}-${Math.abs(seed) % 10000}`;
+  const cached = texCache.get(key);
+  if (cached) return cached;
+  const tex = toTexture(makeSurfaceTexture(type, seed));
   texCache.set(key, tex);
   return tex;
 }
 
-/** 预加载原始纹理图片 */
-const preloadCache = new Map<string, HTMLImageElement>();
-
-export function preloadBaseTextures(): Promise<void[]> {
-  return Promise.all(
-    Object.values(BASES).map((url) => {
-      if (preloadCache.has(url)) return Promise.resolve();
-      return new Promise<void>((resolve) => {
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.onload = () => {
-          preloadCache.set(url, img);
-          resolve();
-        };
-        img.onerror = () => resolve(); // 静默失败
-        img.src = url;
-      });
-    })
-  );
+export function getPlanetCloudTexture(type: PlanetType, seed: number): THREE.CanvasTexture {
+  const key = `cloud-${type}-${Math.abs(seed) % 10000}`;
+  const cached = texCache.get(key);
+  if (cached) return cached;
+  const tex = toTexture(makeCloudTexture(type, seed));
+  texCache.set(key, tex);
+  return tex;
 }
 
-export { BASES };
+export function getPlanetVisualProfile(type: PlanetType): PlanetVisualProfile {
+  return PROFILES[type];
+}
+
+export function preloadBaseTextures(): Promise<void[]> {
+  return Promise.resolve([]);
+}
