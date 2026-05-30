@@ -1,7 +1,14 @@
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   postgres:
     image: postgres:16-alpine
     restart: always
+    logging: *logging
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-mindwell}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -19,6 +26,7 @@ services:
   redis:
     image: redis:7-alpine
     restart: always
+    logging: *logging
     volumes:
       - redis_data:/data
     healthcheck:
@@ -32,6 +40,7 @@ services:
   ollama:
     image: ollama/ollama:latest
     restart: always
+    logging: *logging
     volumes:
       - ollama_data:/root/.ollama
     environment:
@@ -56,6 +65,7 @@ services:
   # Auto-pull model on first start
   ollama-init:
     image: ollama/ollama:latest
+    logging: *logging
     depends_on:
       ollama:
         condition: service_healthy
@@ -73,6 +83,7 @@ services:
   backend:
     build: ./backend
     restart: always
+    logging: *logging
     depends_on:
       postgres:
         condition: service_healthy
@@ -102,6 +113,7 @@ services:
   frontend:
     build: ./frontend
     restart: always
+    logging: *logging
     depends_on:
       - backend
     ports:
