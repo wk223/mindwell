@@ -49,7 +49,7 @@ function getParticleColor(): [number, number, number] {
 function getMoodMultiplier(): number {
   try {
     const root = document.documentElement;
-    if (root.classList.contains("mood-sad")) return 0.5;
+    if (root.classList.contains("mood-anxious")) return 0.4;
     if (root.classList.contains("mood-happy")) return 1.3;
     return 1.0;
   } catch { return 1.0; }

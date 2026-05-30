@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { useMoodStore } from "../stores/useMoodStore";
 
-export type MoodTheme = "happy" | "calm" | "sad" | "neutral";
+export type MoodTheme = "anxious" | "calm" | "happy";
 
 function mapScoreToTheme(score: number | undefined): MoodTheme {
-  if (score === undefined || score === null) return "neutral";
-  if (score >= 8) return "happy";
-  if (score >= 5) return "calm";
-  return "sad";
+  if (score === undefined || score === null) return "calm";
+  if (score >= 7) return "happy";
+  if (score >= 4) return "calm";
+  return "anxious";
 }
 
 export function getMoodGreeting(theme: MoodTheme): string {
@@ -16,13 +16,12 @@ export function getMoodGreeting(theme: MoodTheme): string {
 
   switch (theme) {
     case "happy":
-      return `${timePrefix}，今天看起来不错呢。有什么开心的事想分享吗？`;
+      return `${timePrefix}，今天看起来不错呢。`;
+    case "anxious":
+      return `${timePrefix}，没关系，慢慢来。我在呢。`;
     case "calm":
-      return `${timePrefix}，此刻的平静很珍贵。我在呢。`;
-    case "sad":
-      return `${timePrefix}，没关系，我在这里陪着你。慢慢来。`;
     default:
-      return `${timePrefix}，我是小智，你的心理支持陪伴者。`;
+      return `${timePrefix}，此刻的平静很珍贵。`;
   }
 }
 
@@ -38,7 +37,7 @@ export function useMoodTheme() {
 
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.remove("mood-happy", "mood-calm", "mood-sad", "mood-neutral");
+    root.classList.remove("mood-anxious", "mood-calm", "mood-happy", "mood-neutral", "mood-sad");
     root.classList.add(`mood-${theme}`);
   }, [theme]);
 

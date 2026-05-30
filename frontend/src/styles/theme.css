@@ -145,16 +145,26 @@
   --breathing-color: rgba(134, 239, 172, 0.25);
 }
 
-/* 低落 — 冷紫雾，粒子减少，光更冷 */
-.mood-sad {
-  --accent-300: #a78bfa;
-  --accent-400: #8b5cf6;
-  --accent-500: #7c3aed;
-  --accent-600: #6d28d9;
-  --glow-accent: 0 0 30px -15px rgba(139, 92, 246, 0.15);
-  --glow-accent-strong: 0 0 40px -20px rgba(139, 92, 246, 0.1);
-  --particle-color: rgba(100, 116, 139, 0.35);
-  --breathing-color: rgba(100, 116, 139, 0.15);
+/* 焦虑/雨天 — 冷蓝，粒子减少，雨雾效果 */
+.mood-anxious {
+  --bg-deep: #0f1f35;
+  --bg-mid: #162a45;
+  --bg-surface: rgba(20, 40, 65, 0.55);
+  --bg-card: rgba(15, 30, 50, 0.6);
+  --bg-glass: rgba(10, 25, 45, 0.5);
+  --text-primary: #c8d6e5;
+  --text-secondary: #7a92b0;
+  --text-tertiary: #556b82;
+  --accent-300: #60a5fa;
+  --accent-400: #3b82f6;
+  --accent-500: #2563eb;
+  --accent-600: #1d4ed8;
+  --card-border: rgba(59, 130, 246, 0.2);
+  --border-light: rgba(59, 130, 246, 0.12);
+  --glow-accent: 0 0 30px -15px rgba(59, 130, 246, 0.15);
+  --glow-accent-strong: 0 0 40px -20px rgba(59, 130, 246, 0.1);
+  --particle-color: rgba(96, 165, 250, 0.2);
+  --breathing-color: rgba(59, 130, 246, 0.12);
 }
 
 /* 中性 — 柔和薄荷（同 calm） */
@@ -183,6 +193,20 @@
 @keyframes moonlight-sweep {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+/* ── 雨线下落 ── */
+@keyframes rain-fall {
+  0%   { transform: translateY(-10vh); opacity: 0; }
+  10%  { opacity: 0.3; }
+  90%  { opacity: 0.3; }
+  100% { transform: translateY(110vh); opacity: 0; }
+}
+
+/* ── 雾气漂移 ── */
+@keyframes fog-drift {
+  0%, 100% { transform: translateX(-5%) scale(1.02); opacity: 0.35; }
+  50% { transform: translateX(5%) scale(0.98); opacity: 0.25; }
 }
 
 /* ── 星光闪烁 (随机相位) — 保留给玻璃瓶星点 ── */
