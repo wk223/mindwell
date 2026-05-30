@@ -8,6 +8,7 @@ import MoodCalendar from "../components/mood/MoodCalendar";
 import MoodTimeline from "../components/mood/MoodTimeline";
 import BeijingClock from "../components/mood/BeijingClock";
 import MoonIcon from "../components/shared/MoonIcon";
+import BreathingExercise from "../components/growth/BreathingExercise";
 
 const COMMON_TAGS = ["工作", "家庭", "健康", "人际关系", "学业", "经济", "睡眠", "饮食", "运动"];
 
@@ -69,6 +70,9 @@ export default function GrowthPage() {
           </div>
           <BeijingClock />
         </div>
+
+        {/* 0. 呼吸练习 */}
+        <BreathingExercise />
 
         {/* 1. Quick Check-in — always available */}
         <div className="card-primary paper-texture">
