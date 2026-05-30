@@ -102,7 +102,7 @@ class TestTokenExpiry:
         expire = datetime.now(timezone.utc) - timedelta(hours=1)
         token = jwt.encode(
             {"sub": str(_uuid.uuid4()), "exp": expire},
-            settings.jwt_secret,
+            settings.jwt_secret.get_secret_value(),
             algorithm=settings.jwt_algorithm,
         )
         transport = ASGITransport(app=app)

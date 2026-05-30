@@ -1,4 +1,4 @@
-import { apiRequest } from "./client";
+import { apiRequest, getToken } from "./client";
 import type { Conversation, Message } from "../types/dialogue";
 
 export interface SendMessageCallbacks {
@@ -15,7 +15,7 @@ export function sendMessageStream(
   callbacks: SendMessageCallbacks
 ): AbortController {
   const controller = new AbortController();
-  const token = localStorage.getItem("mindwell_token");
+  const token = getToken();
 
   fetch("/api/v1/dialogue/send", {
     method: "POST",

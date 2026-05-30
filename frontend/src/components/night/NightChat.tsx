@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useDialogueStore } from "../../stores/useDialogueStore";
+import { getToken } from "../../api/client";
 import MoonIcon from "../shared/MoonIcon";
 
 const NIGHT_CONV_KEY = "mindwell_night_conv_id";
@@ -88,7 +89,7 @@ export default function NightChat() {
     setStreamContent(interim);
 
     let fullContent = "";
-    const token = localStorage.getItem("mindwell_token");
+    const token = getToken();
 
     try {
       abortRef.current = new AbortController();

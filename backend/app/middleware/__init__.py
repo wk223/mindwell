@@ -54,13 +54,16 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     def __init__(self, app):
         super().__init__(app)
         self._buckets: dict[str, list[float]] = defaultdict(list)
+        # 测试环境不限流
+        from app.config import get_settings
+        self._is_test = get_settings().app_env in ("testing", "development")
 
     def _clean(self, ip: str, now: float, window_sec: float):
         cutoff = now - window_sec
         self._buckets[ip] = [t for t in self._buckets[ip] if t > cutoff]
 
     async def dispatch(self, request: Request, call_next):
-        if request.url.path == "/health":
+        if request.url.path == "/health" or self._is_test:
             return await call_next(request)
 
         is_auth = request.url.path in _AUTH_PATHS
