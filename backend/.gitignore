@@ -1,0 +1,22 @@
+# pip install -t 污染
+_pytest/
+aiosqlite*/
+anyio*/
+bin/
+certifi*/
+colorama*/
+dns/
+dnspython*/
+email_validator*/
+h11*/
+httpcore*/
+httpx*/
+idna*/
+iniconfig*/
+packaging*/
+pluggy*/
+py.py
+pygments*/
+pytest*/
+pytest_asyncio*/
+test.db

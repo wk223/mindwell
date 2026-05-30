@@ -22,10 +22,13 @@ async def get_current_user(
     if user is None or not user.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found or inactive")
 
-    # ── PostgreSQL Row-Level Security context（仅 PG，非 PG 静默跳过）──
+    # ── PostgreSQL Row-Level Security context（使用 set_config 避免 SQL 拼接）──
     try:
-        await db.execute(text(f"SET app.current_user_id = '{str(user.id)}'"))
+        await db.execute(
+            text("SELECT set_config('app.current_user_id', :uid, false)"),
+            {"uid": str(user.id)},
+        )
     except Exception:
-        pass  # SQLite 不支持 SET，忽略
+        pass  # SQLite 不支持 set_config，忽略
 
     return user
