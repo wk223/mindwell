@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from sqlalchemy import String, Integer, Text, ForeignKey, DateTime
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy import Uuid, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base, new_uuid, utcnow
 
@@ -31,8 +31,8 @@ class Message(Base):
     role: Mapped[str] = mapped_column(String(20), nullable=False)  # user, assistant, system
     content: Mapped[str] = mapped_column(Text, nullable=False)
     agent_id: Mapped[str] = mapped_column(String(50), nullable=True)
-    safety_flags: Mapped[list] = mapped_column(JSONB, default=list)
-    extra_meta: Mapped[dict] = mapped_column("meta_info", JSONB, default=dict)
+    safety_flags: Mapped[list] = mapped_column(JSON, default=list)
+    extra_meta: Mapped[dict] = mapped_column("meta_info", JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(default=utcnow)
 
     conversation = relationship("Conversation", back_populates="messages")
