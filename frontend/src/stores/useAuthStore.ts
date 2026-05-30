@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import * as authApi from "../api/auth";
-import { AUTH_EXPIRED_EVENT } from "../api/client";
+import { AUTH_EXPIRED_EVENT, getToken } from "../api/client";
 import type { User } from "../api/auth";
 
 // ── JWT helpers ──
@@ -21,7 +21,7 @@ function isTokenExpired(token: string, bufferSec = 30): boolean {
 }
 
 function getStoredToken(): string | null {
-  const token = localStorage.getItem("mindwell_token");
+  const token = getToken();
   if (!token) return null;
   if (isTokenExpired(token)) {
     localStorage.removeItem("mindwell_token");

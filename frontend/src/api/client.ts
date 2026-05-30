@@ -16,7 +16,7 @@ class ApiError extends Error {
 const TOKEN_KEY = "mindwell_token";
 const PREFIX = "mw_";
 
-function getToken(): string | null {
+export function getToken(): string | null {
   try {
     const raw = localStorage.getItem(TOKEN_KEY);
     if (!raw) return null;
