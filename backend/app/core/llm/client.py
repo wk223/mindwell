@@ -33,7 +33,7 @@ class LLMClient:
         self._client = httpx.AsyncClient(
             base_url=self._settings.llm_base_url,
             headers={
-                "Authorization": f"Bearer {self._settings.llm_api_key}",
+                "Authorization": f"Bearer {self._settings.llm_api_key.get_secret_value()}",
                 "Content-Type": "application/json",
             },
             timeout=httpx.Timeout(10.0, read=90.0),  # 10s connect, 90s read for streaming

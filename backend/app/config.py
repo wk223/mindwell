@@ -1,3 +1,4 @@
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings
 from functools import lru_cache
 
@@ -11,12 +12,12 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
 
     # JWT
-    jwt_secret: str = "dev-secret-change-in-production"
+    jwt_secret: SecretStr = SecretStr("dev-secret-change-in-production")
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 1440
 
     # LLM
-    llm_api_key: str = ""
+    llm_api_key: SecretStr = SecretStr("")
     llm_base_url: str = "https://api.deepseek.com/v1"
     llm_model: str = "deepseek-chat"
     llm_max_tokens: int = 1024

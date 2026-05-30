@@ -18,7 +18,7 @@ from app.middleware import (
 settings = get_settings()
 
 # ── Production safety guard ──
-if settings.app_env == "production" and settings.jwt_secret == "dev-secret-change-in-production":
+if settings.app_env == "production" and settings.jwt_secret.get_secret_value() == "dev-secret-change-in-production":
     sys.exit("FATAL: JWT_SECRET is still the dev default in production mode. Set JWT_SECRET env var.")
 
 # ── CORS: credentials require explicit origins (not wildcard) ──

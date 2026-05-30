@@ -43,31 +43,34 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
 
 # ── Rate limiter (in-process, per-IP sliding-window) ──
 
-_RATE_WINDOW_SEC = 60
-_RATE_MAX_REQUESTS = 120  # per window per IP
+_AUTH_PATHS = {"/api/v1/auth/login", "/api/v1/auth/register"}
+_NORMAL_MAX = 120   # 普通接口：120次/分钟
+_AUTH_MAX = 5       # 登录/注册：5次/分钟（防暴力破解）
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
-    """Simple in-process sliding-window rate limiter."""
+    """Simple in-process sliding-window rate limiter, stricter for auth."""
 
-    def __init__(self, app, max_requests: int = _RATE_MAX_REQUESTS, window_sec: int = _RATE_WINDOW_SEC):
+    def __init__(self, app):
         super().__init__(app)
-        self.max_requests = max_requests
-        self.window_sec = window_sec
         self._buckets: dict[str, list[float]] = defaultdict(list)
 
-    def _clean(self, ip: str, now: float):
-        cutoff = now - self.window_sec
+    def _clean(self, ip: str, now: float, window_sec: float):
+        cutoff = now - window_sec
         self._buckets[ip] = [t for t in self._buckets[ip] if t > cutoff]
 
     async def dispatch(self, request: Request, call_next):
-        if request.url.path in ("/health", "/api/v1/auth/login", "/api/v1/auth/register"):
-            # These paths have their own rate-limiting considerations
-            pass
+        if request.url.path == "/health":
+            return await call_next(request)
+
+        is_auth = request.url.path in _AUTH_PATHS
+        max_req = _AUTH_MAX if is_auth else _NORMAL_MAX
+        window = 60.0  # 统一 60 秒窗口
+
         ip = request.client.host if request.client else "unknown"
         now = time.monotonic()
-        self._clean(ip, now)
-        if len(self._buckets[ip]) >= self.max_requests:
+        self._clean(ip, now, window)
+        if len(self._buckets[ip]) >= max_req:
             return JSONResponse(
                 status_code=429,
                 content={"detail": "Too many requests. Please slow down."},

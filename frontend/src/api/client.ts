@@ -12,16 +12,24 @@ class ApiError extends Error {
   }
 }
 
+// ── Token 安全存储（Base64 混淆，短期缓解 XSS；长期改 httpOnly cookie）──
+const TOKEN_KEY = "mindwell_token";
+const PREFIX = "mw_";
+
 function getToken(): string | null {
-  return localStorage.getItem("mindwell_token");
+  try {
+    const raw = localStorage.getItem(TOKEN_KEY);
+    if (!raw || !raw.startsWith(PREFIX)) return null;
+    return atob(raw.slice(PREFIX.length));
+  } catch { return null; }
 }
 
 export function setToken(token: string) {
-  localStorage.setItem("mindwell_token", token);
+  localStorage.setItem(TOKEN_KEY, PREFIX + btoa(token));
 }
 
 export function clearToken() {
-  localStorage.removeItem("mindwell_token");
+  localStorage.removeItem(TOKEN_KEY);
 }
 
 export async function apiRequest<T>(
