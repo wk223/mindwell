@@ -44,7 +44,7 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
 # ── Rate limiter (in-process, per-IP sliding-window) ──
 
 _AUTH_PATHS = {"/api/v1/auth/login", "/api/v1/auth/register"}
-_NORMAL_MAX = 120   # 普通接口：120次/分钟
+_NORMAL_MAX = 300   # 普通接口：300次/分钟（前端并发 API 调用多）
 _AUTH_MAX = 5       # 登录/注册：5次/分钟（防暴力破解）
 
 
